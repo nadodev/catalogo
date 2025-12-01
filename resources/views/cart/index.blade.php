@@ -30,6 +30,31 @@
 
     @push('scripts')
     <script>
+        // Função para calcular preço baseado na quantidade (se não estiver no app.js)
+        if (typeof calculatePriceForQuantity === 'undefined') {
+            window.calculatePriceForQuantity = function(quantity, basePrice, quantityPrices) {
+                if (!quantityPrices || quantityPrices.length === 0) {
+                    return basePrice || 0;
+                }
+
+                let selectedPrice = basePrice || 0;
+                let selectedTier = null;
+
+                for (let tier of quantityPrices) {
+                    if (quantity >= tier.min_quantity) {
+                        if (tier.max_quantity === null || quantity <= tier.max_quantity) {
+                            if (!selectedTier || tier.min_quantity > selectedTier.min_quantity) {
+                                selectedTier = tier;
+                                selectedPrice = tier.price;
+                            }
+                        }
+                    }
+                }
+
+                return selectedPrice;
+            };
+        }
+        
         function renderCart() {
             const cart = getCart();
             const container = document.getElementById('cart-container');
@@ -60,7 +85,16 @@
 
             cart.forEach(item => {
                 totalItems += item.quantity;
-                const itemTotal = (item.price || 0) * item.quantity;
+                
+                // Recalcular preço baseado na quantidade atual
+                let itemPrice = item.price || 0;
+                if (item.quantityPrices && item.quantityPrices.length > 0) {
+                    itemPrice = calculatePriceForQuantity(item.quantity, item.basePrice || item.price, item.quantityPrices);
+                    // Atualizar no carrinho
+                    item.price = itemPrice;
+                }
+                
+                const itemTotal = itemPrice * item.quantity;
                 html += `
                     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                         <div class="flex gap-4">
@@ -95,7 +129,10 @@
                                     </div>
                                     
                                     <div class="text-right">
-                                        ${item.price ? `<p class="text-lg font-bold text-gray-900">R$ ${(itemTotal).toFixed(2).replace('.', ',')}</p>` : '<p class="text-lg font-bold text-blue-600">Sob Consulta</p>'}
+                                        ${itemPrice > 0 ? `
+                                            <p class="text-lg font-bold text-gray-900">R$ ${(itemTotal).toFixed(2).replace('.', ',')}</p>
+                                            ${item.quantity > 1 ? `<p class="text-xs text-gray-500">R$ ${itemPrice.toFixed(2).replace('.', ',')} cada</p>` : ''}
+                                        ` : '<p class="text-lg font-bold text-blue-600">Sob Consulta</p>'}
                                         <button onclick="removeFromCart(${item.id})" class="text-sm text-red-600 hover:text-red-700 mt-1">
                                             Remover
                                         </button>
@@ -143,6 +180,9 @@
             `;
 
             container.innerHTML = html;
+            
+            // Salvar carrinho atualizado com preços recalculados
+            localStorage.setItem('cart', JSON.stringify(cart));
         }
 
 

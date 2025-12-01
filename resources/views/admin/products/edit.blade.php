@@ -4,9 +4,33 @@
 @section('page-title', 'Editar Produto')
 
 @section('content')
-<form action="{{ route('admin.products.update', $product) }}" method="POST" enctype="multipart/form-data" class="space-y-6">
+@if($errors->any())
+<div class="mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded-lg">
+    <div class="flex">
+        <div class="flex-shrink-0">
+            <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+            </svg>
+        </div>
+        <div class="ml-3">
+            <h3 class="text-sm font-medium text-red-800">Erros de Validação</h3>
+            <div class="mt-2 text-sm text-red-700">
+                <ul class="list-disc list-inside space-y-1">
+                    @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+@endif
+
+<form action="{{ route('admin.products.update', $product) }}" method="POST" enctype="multipart/form-data" class="space-y-6" id="product-edit-form" data-product-id="{{ $product->id }}">
     @csrf
     @method('PUT')
+    <input type="hidden" name="_update" value="1">
+    <input type="hidden" name="product_id" value="{{ $product->id }}">
     
     <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-6">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -39,6 +63,7 @@
                         </option>
                     @endforeach
                 </select>
+                @error('category_id')<p class="text-red-500 text-sm mt-1">{{ $message }}</p>@enderror
             </div>
 
             <div>
@@ -118,6 +143,71 @@
             </div>
         </div>
 
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Preços por Quantidade</label>
+            <div id="quantity-prices-container" class="space-y-4">
+                @if($product->allQuantityPrices->count() > 0)
+                    @foreach($product->allQuantityPrices as $index => $priceTier)
+                    <div class="quantity-price-item border border-gray-200 rounded-lg p-4">
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Quantidade Mínima *</label>
+                                <input type="number" name="quantity_prices[{{ $index }}][min_quantity]" min="1" value="{{ $priceTier->min_quantity }}"
+                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Quantidade Máxima (opcional)</label>
+                                <input type="number" name="quantity_prices[{{ $index }}][max_quantity]" min="1" value="{{ $priceTier->max_quantity }}" placeholder="Deixe vazio para sem limite"
+                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Preço *</label>
+                                <input type="number" name="quantity_prices[{{ $index }}][price]" step="0.01" min="0" value="{{ $priceTier->price }}"
+                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            </div>
+                            <div class="flex items-end">
+                                <button type="button" onclick="this.closest('.quantity-price-item').remove()" class="w-full px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 text-sm font-medium">
+                                    Remover
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    @endforeach
+                @else
+                    <div class="quantity-price-item border border-gray-200 rounded-lg p-4">
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Quantidade Mínima *</label>
+                                <input type="number" name="quantity_prices[0][min_quantity]" min="1" value="1"
+                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Quantidade Máxima (opcional)</label>
+                                <input type="number" name="quantity_prices[0][max_quantity]" min="1" placeholder="Deixe vazio para sem limite"
+                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Preço *</label>
+                                <input type="number" name="quantity_prices[0][price]" step="0.01" min="0"
+                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            </div>
+                            <div class="flex items-end">
+                                <button type="button" onclick="this.closest('.quantity-price-item').remove()" class="w-full px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 text-sm font-medium">
+                                    Remover
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                @endif
+            </div>
+            <button type="button" onclick="addQuantityPrice()" class="mt-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 text-sm font-medium">
+                + Adicionar Faixa de Preço
+            </button>
+            <p class="text-xs text-gray-500 mt-2">Configure preços diferentes baseados na quantidade comprada (ex: 1-9 unidades = R$ 10, 10+ unidades = R$ 8)</p>
+        </div>
+
+        {{-- Seção de Variantes REMOVIDA --}}
+
         @if($product->images->count() > 0)
         <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">Imagens Atuais</label>
@@ -125,13 +215,16 @@
                 @foreach($product->images as $image)
                 <div class="relative">
                     <img src="{{ asset('storage/' . $image->image_path) }}" alt="Imagem" class="w-full h-32 object-cover rounded-lg">
-                    <a href="{{ route('admin.products.delete-image', $image->id) }}" 
-                       onclick="return confirm('Tem certeza?')"
-                       class="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full hover:bg-red-600">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                        </svg>
-                    </a>
+                    {{-- Formulário de delete FORA do form principal para evitar interceptação --}}
+                    <form action="{{ route('admin.products.delete-image', $image->id) }}" method="POST" class="absolute top-2 right-2 delete-image-form" data-form-type="delete-image" onsubmit="return confirm('Tem certeza?');" style="z-index: 10;">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="bg-red-500 text-white p-1 rounded-full hover:bg-red-600">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
+                    </form>
                 </div>
                 @endforeach
             </div>
@@ -145,14 +238,276 @@
         </div>
     </div>
 
+    @push('scripts')
+    <script>
+        let quantityPriceIndex = {{ $product->allQuantityPrices->count() }};
+        
+        function addQuantityPrice() {
+            const container = document.getElementById('quantity-prices-container');
+            const newPriceTier = document.createElement('div');
+            newPriceTier.className = 'quantity-price-item border border-gray-200 rounded-lg p-4';
+            newPriceTier.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Quantidade Mínima *</label>
+                        <input type="number" name="quantity_prices[${quantityPriceIndex}][min_quantity]" min="1"
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Quantidade Máxima (opcional)</label>
+                        <input type="number" name="quantity_prices[${quantityPriceIndex}][max_quantity]" min="1" placeholder="Deixe vazio para sem limite"
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Preço *</label>
+                        <input type="number" name="quantity_prices[${quantityPriceIndex}][price]" step="0.01" min="0"
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+                    <div class="flex items-end">
+                        <button type="button" onclick="this.closest('.quantity-price-item').remove()" class="w-full px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 text-sm font-medium">
+                            Remover
+                        </button>
+                    </div>
+                </div>
+            `;
+            container.appendChild(newPriceTier);
+            quantityPriceIndex++;
+        }
+    </script>
+    @endpush
+
     <div class="flex items-center justify-end gap-4">
         <a href="{{ route('admin.products.index') }}" class="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
             Cancelar
         </a>
-        <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold">
+        <button type="submit" id="submit-btn" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold" form="product-edit-form">
             Atualizar Produto
         </button>
     </div>
 </form>
+
+{{-- JavaScript removido temporariamente para teste --}}
+@push('scripts')
+<script>
+    // TESTE: Verificar se o formulário está sendo submetido
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('product-edit-form');
+        const btn = document.getElementById('submit-btn');
+        
+        // IMPORTANTE: Adicionar listeners nos formulários de delete de imagem ANTES do listener principal
+        // Isso garante que eles não sejam interceptados
+        // Usar setTimeout para garantir que os formulários já existam no DOM
+        setTimeout(function() {
+            document.querySelectorAll('.delete-image-form').forEach(function(deleteForm) {
+                console.log('🔒 Protegendo formulário de delete de imagem:', deleteForm.action);
+                
+                // Salvar a action original ANTES de qualquer listener
+                const originalAction = deleteForm.action;
+                
+                // Adicionar listener com capture phase para garantir execução primeiro
+                deleteForm.addEventListener('submit', function(e) {
+                    console.log('✅ Formulário de delete de imagem - deixando passar normalmente:', deleteForm.action);
+                    
+                    // Garantir que a action não foi alterada - restaurar se necessário
+                    if (deleteForm.action !== originalAction) {
+                        console.warn('⚠️ Action foi alterada! Restaurando:', deleteForm.action, '->', originalAction);
+                        deleteForm.action = originalAction;
+                    }
+                    
+                    // Garantir que o evento não seja interceptado pelo form principal
+                    e.stopImmediatePropagation(); // Para todos os outros listeners
+                    e.stopPropagation(); // Para propagação
+                    // NÃO fazer preventDefault - deixar o evento seguir normalmente
+                }, true); // Usar capture phase para garantir que seja executado primeiro
+            });
+        }, 100);
+        
+        if (form && btn) {
+            console.log('✅ Formulário encontrado:', form.action);
+            
+            // Listener no botão
+            btn.addEventListener('click', function(e) {
+                console.log('🖱️ Botão clicado!');
+            });
+            
+            // Listener no formulário - IMPORTANTE: verificar ANTES de qualquer coisa
+            // Usar bubble phase (false) para não interferir com forms filhos
+            form.addEventListener('submit', function(e) {
+                const targetForm = e.target;
+                
+                // VERIFICAÇÃO CRÍTICA: Se não é o formulário principal (por ID), deixar passar imediatamente
+                // Esta é a verificação mais importante - se o target não é o form principal, não fazer nada
+                if (targetForm !== form || (targetForm && targetForm.id !== 'product-edit-form')) {
+                    console.log('⚠️ Submit de formulário diferente - deixando passar:', {
+                        target: targetForm?.id || 'N/A',
+                        action: targetForm?.action || 'N/A',
+                        isMainForm: targetForm === form
+                    });
+                    // NÃO fazer preventDefault nem stopPropagation - deixar o evento seguir normalmente
+                    return; // Deixar o submit normal acontecer (ex: delete de imagem)
+                }
+                
+                // SEGUNDA VERIFICAÇÃO: Se o formulário tem data-form-type="delete-image", deixar passar
+                if (targetForm && targetForm.dataset.formType === 'delete-image') {
+                    console.log('⚠️ Submit de formulário delete-image (data-form-type) - deixando passar:', targetForm.action);
+                    return; // Deixar o submit normal acontecer
+                }
+                
+                // TERCEIRA VERIFICAÇÃO: Se o formulário tem action de delete-image, deixar passar
+                if (targetForm && targetForm.action && targetForm.action.includes('delete-image')) {
+                    console.log('⚠️ Submit de formulário delete-image (action) - deixando passar:', targetForm.action);
+                    return; // Deixar o submit normal acontecer
+                }
+                
+                // QUARTA VERIFICAÇÃO: Se tem método DELETE e não tem flag _update, pode ser delete de imagem
+                const methodInput = targetForm.querySelector('input[name="_method"]');
+                if (methodInput && methodInput.value === 'DELETE' && !targetForm.querySelector('input[name="_update"]')) {
+                    console.log('⚠️ Submit com método DELETE sem flag _update - deixando passar (delete imagem)');
+                    return; // Deixar o submit normal acontecer
+                }
+                
+                // QUINTA VERIFICAÇÃO: Se tem classe delete-image-form, deixar passar
+                if (targetForm && targetForm.classList.contains('delete-image-form')) {
+                    console.log('⚠️ Submit de formulário delete-image (classe) - deixando passar:', targetForm.action);
+                    return; // Deixar o submit normal acontecer
+                }
+                
+                // Se chegou aqui, é o formulário principal
+                // PREVENIR submit temporariamente para garantir correções
+                e.preventDefault();
+                e.stopPropagation();
+                
+                console.log('📤 FORMULÁRIO PRINCIPAL SUBMETIDO - PREVENIDO TEMPORARIAMENTE!');
+                console.log('Action ANTES:', form.action);
+                console.log('Method:', form.method);
+                
+                // FORÇAR método PUT - CRÍTICO
+                let methodInput = form.querySelector('input[name="_method"]');
+                if (!methodInput) {
+                    methodInput = document.createElement('input');
+                    methodInput.type = 'hidden';
+                    methodInput.name = '_method';
+                    form.appendChild(methodInput);
+                }
+                // SEMPRE forçar PUT, não importa o que estava antes
+                methodInput.value = 'PUT';
+                console.log('✅ _method FORÇADO para PUT:', methodInput.value);
+                
+                // REMOVER qualquer input _method com valor DELETE APENAS do formulário principal
+                // NÃO remover dos formulários de delete de imagem (eles precisam do DELETE)
+                // Usar apenas form.querySelectorAll para pegar apenas inputs dentro do form principal
+                const formMethodInputs = form.querySelectorAll('input[name="_method"]');
+                formMethodInputs.forEach(function(input) {
+                    // Verificar se o input está diretamente no form principal (não em um form filho)
+                    if (input.value === 'DELETE' && input.closest('form') === form) {
+                        console.warn('⚠️ Removendo input _method com valor DELETE do formulário principal!');
+                        input.remove();
+                    }
+                });
+                
+                // Garantir que o campo _update existe
+                if (!form.querySelector('input[name="_update"]')) {
+                    const updateInput = document.createElement('input');
+                    updateInput.type = 'hidden';
+                    updateInput.name = '_update';
+                    updateInput.value = '1';
+                    form.appendChild(updateInput);
+                }
+                
+                // GARANTIR que a action está correta (deve terminar com /update)
+                // IMPORTANTE: Só fazer isso se for realmente o formulário principal
+                // VERIFICAÇÕES MÚLTIPLAS para garantir que não alteramos formulários de delete
+                const productId = form.dataset.productId || form.querySelector('input[name="product_id"]')?.value;
+                const currentAction = form.action;
+                
+                // VERIFICAÇÃO CRÍTICA: Se a action contém delete-image, NÃO ALTERAR
+                if (currentAction.includes('delete-image')) {
+                    console.log('⚠️ Action é de delete-image - NÃO alterar!');
+                    return; // Sair imediatamente - não processar mais nada
+                }
+                
+                // VERIFICAÇÃO: Se o formulário tem classe delete-image-form, NÃO ALTERAR
+                if (form.classList.contains('delete-image-form')) {
+                    console.log('⚠️ Formulário tem classe delete-image-form - NÃO alterar!');
+                    return; // Sair imediatamente
+                }
+                
+                // VERIFICAÇÃO: Se o formulário tem data-form-type="delete-image", NÃO ALTERAR
+                if (form.dataset.formType === 'delete-image') {
+                    console.log('⚠️ Formulário tem data-form-type="delete-image" - NÃO alterar!');
+                    return; // Sair imediatamente
+                }
+                
+                // Se chegou aqui, é seguro alterar a action
+                let expectedAction = currentAction;
+                
+                if (!currentAction.includes('/update')) {
+                    expectedAction = currentAction.replace(/\/products\/\d+$/, '/update');
+                }
+                
+                if (form.action !== expectedAction) {
+                    form.action = expectedAction;
+                    console.log('✅ Action corrigida para:', form.action);
+                }
+                
+                // Limpar faixas de preço completamente vazias ANTES de enviar
+                document.querySelectorAll('.quantity-price-item').forEach(function(item) {
+                    const minQty = item.querySelector('input[name*="[min_quantity]"]');
+                    const price = item.querySelector('input[name*="[price]"]');
+                    if ((!minQty || !minQty.value || minQty.value === '') && 
+                        (!price || !price.value || price.value === '')) {
+                        console.log('Removendo faixa de preço vazia');
+                        item.remove();
+                    }
+                });
+                
+                // Mudar botão
+                btn.disabled = true;
+                btn.innerHTML = 'Salvando...';
+                
+                console.log('✅ Formulário validado ANTES de enviar:', {
+                    action: form.action,
+                    method: form.method,
+                    _method: methodInput.value,
+                    product_id: productId,
+                    all_method_inputs: Array.from(form.querySelectorAll('input[name="_method"]')).map(i => i.value)
+                });
+                
+                // AGORA enviar o formulário manualmente
+                setTimeout(function() {
+                    // Verificar uma última vez antes de enviar que é realmente o form principal
+                    if (form.id !== 'product-edit-form') {
+                        console.error('❌ ERRO: Não é o formulário principal!');
+                        return;
+                    }
+                    
+                    // Verificar uma última vez antes de enviar
+                    const finalMethodInput = form.querySelector('input[name="_method"]');
+                    if (finalMethodInput && finalMethodInput.value !== 'PUT') {
+                        console.error('❌ ERRO: _method ainda não é PUT! Forçando novamente...');
+                        finalMethodInput.value = 'PUT';
+                    }
+                    
+                    // Garantir que a action não foi alterada para delete-image
+                    if (form.action.includes('delete-image')) {
+                        console.error('❌ ERRO: Action foi alterada incorretamente para delete-image!');
+                        return;
+                    }
+                    
+                    console.log('🚀 Enviando formulário com:', {
+                        action: form.action,
+                        _method: finalMethodInput?.value
+                    });
+                    
+                    // Enviar usando submit nativo
+                    form.submit();
+                }, 100);
+            }, false); // false = usar bubble phase (não capture) para não interferir com forms filhos
+        } else {
+            console.error('❌ Formulário ou botão não encontrado!');
+        }
+    });
+</script>
+@endpush
 @endsection
 

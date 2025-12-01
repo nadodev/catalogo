@@ -121,12 +121,183 @@
         </div>
 
         <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Preços por Quantidade</label>
+            <div id="quantity-prices-container" class="space-y-4">
+                <div class="quantity-price-item border border-gray-200 rounded-lg p-4">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Quantidade Mínima *</label>
+                            <input type="number" name="quantity_prices[0][min_quantity]" min="1" value="1" required
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Quantidade Máxima (opcional)</label>
+                            <input type="number" name="quantity_prices[0][max_quantity]" min="1" placeholder="Deixe vazio para sem limite"
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Preço *</label>
+                            <input type="number" name="quantity_prices[0][price]" step="0.01" min="0" required
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        <div class="flex items-end">
+                            <button type="button" onclick="this.closest('.quantity-price-item').remove()" class="w-full px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 text-sm font-medium">
+                                Remover
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <button type="button" onclick="addQuantityPrice()" class="mt-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 text-sm font-medium">
+                + Adicionar Faixa de Preço
+            </button>
+            <p class="text-xs text-gray-500 mt-2">Configure preços diferentes baseados na quantidade comprada (ex: 1-9 unidades = R$ 10, 10+ unidades = R$ 8)</p>
+        </div>
+
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Variantes (Cores e Tamanhos)</label>
+            <div id="variants-container" class="space-y-4">
+                <div class="variant-item border border-gray-200 rounded-lg p-4">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Cor</label>
+                            <select name="variants[0][color_id]" class="variant-color w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                <option value="">Selecione uma cor...</option>
+                                @foreach($colors as $color)
+                                    <option value="{{ $color->id }}">{{ $color->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Tamanho</label>
+                            <select name="variants[0][size_id]" class="variant-size w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                <option value="">Selecione um tamanho...</option>
+                                @foreach($sizes as $size)
+                                    <option value="{{ $size->id }}">{{ $size->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Preço (opcional)</label>
+                            <input type="number" name="variants[0][price]" step="0.01" placeholder="Deixe vazio para usar preço padrão"
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Estoque (opcional)</label>
+                            <input type="number" name="variants[0][stock]" min="0" placeholder="Estoque"
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                    </div>
+                    <div class="mt-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">SKU (opcional)</label>
+                        <input type="text" name="variants[0][sku]" placeholder="SKU da variante"
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+                </div>
+            </div>
+            <button type="button" onclick="addVariant()" class="mt-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 text-sm font-medium">
+                + Adicionar Variante
+            </button>
+            <p class="text-xs text-gray-500 mt-2">Adicione combinações de cores e tamanhos para este produto</p>
+        </div>
+
+        <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">Imagens</label>
             <input type="file" name="images[]" multiple accept="image/*"
                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
             <p class="text-xs text-gray-500 mt-1">Você pode selecionar múltiplas imagens</p>
         </div>
     </div>
+
+    @push('scripts')
+    <script>
+        let variantIndex = 1;
+        let quantityPriceIndex = 1;
+        
+        function addQuantityPrice() {
+            const container = document.getElementById('quantity-prices-container');
+            const newPriceTier = document.createElement('div');
+            newPriceTier.className = 'quantity-price-item border border-gray-200 rounded-lg p-4';
+            newPriceTier.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Quantidade Mínima *</label>
+                        <input type="number" name="quantity_prices[${quantityPriceIndex}][min_quantity]" min="1" required
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Quantidade Máxima (opcional)</label>
+                        <input type="number" name="quantity_prices[${quantityPriceIndex}][max_quantity]" min="1" placeholder="Deixe vazio para sem limite"
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Preço *</label>
+                        <input type="number" name="quantity_prices[${quantityPriceIndex}][price]" step="0.01" min="0" required
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+                    <div class="flex items-end">
+                        <button type="button" onclick="this.closest('.quantity-price-item').remove()" class="w-full px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 text-sm font-medium">
+                            Remover
+                        </button>
+                    </div>
+                </div>
+            `;
+            container.appendChild(newPriceTier);
+            quantityPriceIndex++;
+        }
+        
+        function addVariant() {
+            const container = document.getElementById('variants-container');
+            const newVariant = document.createElement('div');
+            newVariant.className = 'variant-item border border-gray-200 rounded-lg p-4';
+            newVariant.innerHTML = `
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-sm font-medium text-gray-700">Variante ${variantIndex + 1}</span>
+                    <button type="button" onclick="this.closest('.variant-item').remove()" class="text-red-500 hover:text-red-700 text-sm">
+                        Remover
+                    </button>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Cor</label>
+                        <select name="variants[${variantIndex}][color_id]" class="variant-color w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="">Selecione uma cor...</option>
+                            @foreach($colors as $color)
+                                <option value="{{ $color->id }}">{{ $color->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Tamanho</label>
+                        <select name="variants[${variantIndex}][size_id]" class="variant-size w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="">Selecione um tamanho...</option>
+                            @foreach($sizes as $size)
+                                <option value="{{ $size->id }}">{{ $size->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Preço (opcional)</label>
+                        <input type="number" name="variants[${variantIndex}][price]" step="0.01" placeholder="Deixe vazio para usar preço padrão"
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Estoque (opcional)</label>
+                        <input type="number" name="variants[${variantIndex}][stock]" min="0" placeholder="Estoque"
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+                </div>
+                <div class="mt-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">SKU (opcional)</label>
+                    <input type="text" name="variants[${variantIndex}][sku]" placeholder="SKU da variante"
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                </div>
+            `;
+            container.appendChild(newVariant);
+            variantIndex++;
+        }
+    </script>
+    @endpush
 
     <div class="flex items-center justify-end gap-4">
         <a href="{{ route('admin.products.index') }}" class="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">

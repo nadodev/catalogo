@@ -93,11 +93,32 @@
 
                 <!-- Preço -->
                 <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-6 border border-blue-100">
-                    @if($product->show_price && $product->price)
+                    @if($product->show_price)
                         <div class="text-sm text-gray-600 mb-1">Preço</div>
-                        <span class="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                            R$ {{ number_format($product->price, 2, ',', '.') }}
-                        </span>
+                        <div id="price-display">
+                            @if($product->price)
+                                <span class="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                                    R$ {{ number_format($product->price, 2, ',', '.') }}
+                                </span>
+                                <div class="text-sm text-gray-500 mt-1" id="price-per-unit"></div>
+                            @else
+                                <span class="text-3xl font-bold text-blue-600">Sob Consulta</span>
+                            @endif
+                        </div>
+                        
+                        @if($product->quantityPrices->count() > 0)
+                        <div class="mt-4 pt-4 border-t border-blue-200">
+                            <div class="text-xs font-semibold text-gray-600 mb-2">Tabela de Preços por Quantidade:</div>
+                            <div class="space-y-1">
+                                @foreach($product->quantityPrices as $priceTier)
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-gray-600">{{ $priceTier->getRangeDescription() }}:</span>
+                                    <span class="font-bold text-blue-600">R$ {{ number_format($priceTier->price, 2, ',', '.') }}</span>
+                                </div>
+                                @endforeach
+                            </div>
+                        </div>
+                        @endif
                     @else
                         <div class="text-sm text-gray-600 mb-1">Preço</div>
                         <span class="text-3xl font-bold text-blue-600">Sob Consulta</span>
@@ -121,6 +142,98 @@
                             {{ $material->name }}
                         </span>
                         @endforeach
+                    </div>
+                </div>
+                @endif
+
+                @if($product->variants->count() > 0)
+                <div class="pt-6 border-t border-gray-100">
+                    <h3 class="font-bold text-gray-900 mb-4">Opções Disponíveis:</h3>
+                    <div class="space-y-4">
+                        @php
+                            $variantsByColor = $product->variants->groupBy('color_id');
+                            $variantsBySize = $product->variants->groupBy('size_id');
+                        @endphp
+                        
+                        @if($variantsByColor->count() > 1 || ($variantsByColor->first() && $variantsByColor->first()->first()->color))
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Cores:</label>
+                            <div class="flex flex-wrap gap-2">
+                                @foreach($variantsByColor as $colorId => $variants)
+                                    @if($variants->first()->color)
+                                        <div class="relative group">
+                                            <button type="button" 
+                                                    class="px-4 py-2 border-2 border-gray-200 rounded-lg hover:border-blue-500 transition-all font-medium text-sm"
+                                                    onclick="selectVariantColor({{ $colorId }})">
+                                                <span class="flex items-center gap-2">
+                                                    @if($variants->first()->color->hex_code)
+                                                        <span class="w-5 h-5 rounded-full border border-gray-300" style="background-color: {{ $variants->first()->color->hex_code }}"></span>
+                                                    @endif
+                                                    {{ $variants->first()->color->name }}
+                                                </span>
+                                            </button>
+                                        </div>
+                                    @endif
+                                @endforeach
+                            </div>
+                        </div>
+                        @endif
+
+                        @if($variantsBySize->count() > 1 || ($variantsBySize->first() && $variantsBySize->first()->first()->size))
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Tamanhos:</label>
+                            <div class="flex flex-wrap gap-2">
+                                @foreach($variantsBySize as $sizeId => $variants)
+                                    @if($variants->first()->size)
+                                        <button type="button" 
+                                                class="px-4 py-2 border-2 border-gray-200 rounded-lg hover:border-blue-500 transition-all font-medium text-sm variant-size-btn"
+                                                onclick="selectVariantSize({{ $sizeId }})">
+                                            {{ $variants->first()->size->name }}
+                                        </button>
+                                    @endif
+                                @endforeach
+                            </div>
+                        </div>
+                        @endif
+
+                        <!-- Lista de todas as variantes disponíveis -->
+                        <div class="mt-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Variantes Disponíveis:</label>
+                            <div class="space-y-2">
+                                @foreach($product->variants->where('is_active', true) as $variant)
+                                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200">
+                                        <div class="flex items-center gap-3">
+                                            @if($variant->color)
+                                                <span class="flex items-center gap-2">
+                                                    @if($variant->color->hex_code)
+                                                        <span class="w-4 h-4 rounded-full border border-gray-300" style="background-color: {{ $variant->color->hex_code }}"></span>
+                                                    @endif
+                                                    <span class="font-medium">{{ $variant->color->name }}</span>
+                                                </span>
+                                            @endif
+                                            @if($variant->color && $variant->size)
+                                                <span class="text-gray-400">•</span>
+                                            @endif
+                                            @if($variant->size)
+                                                <span class="font-medium">{{ $variant->size->name }}</span>
+                                            @endif
+                                        </div>
+                                        <div class="text-right">
+                                            @if($variant->price)
+                                                <span class="font-bold text-blue-600">R$ {{ number_format($variant->price, 2, ',', '.') }}</span>
+                                            @elseif($product->show_price && $product->price)
+                                                <span class="font-bold text-blue-600">R$ {{ number_format($product->price, 2, ',', '.') }}</span>
+                                            @else
+                                                <span class="font-bold text-blue-600">Sob Consulta</span>
+                                            @endif
+                                            @if($variant->stock !== null)
+                                                <div class="text-xs text-gray-500 mt-1">Estoque: {{ $variant->stock }}</div>
+                                            @endif
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
                     </div>
                 </div>
                 @endif
@@ -251,7 +364,14 @@
             name: '{{ addslashes($product->name) }}',
             slug: '{{ $product->slug }}',
             price: {{ $product->price ?? 0 }},
-            image: @if($product->images->count() > 0) '{{ asset('storage/' . $product->images->first()->image_path) }}' @else null @endif
+            image: @if($product->images->count() > 0) '{{ asset('storage/' . $product->images->first()->image_path) }}' @else null @endif,
+            quantityPrices: @json($product->quantityPrices->map(function($tier) {
+                return [
+                    'min_quantity' => $tier->min_quantity,
+                    'max_quantity' => $tier->max_quantity,
+                    'price' => (float)$tier->price
+                ];
+            }))
         };
 
         function updateProductQuantity(productId, change, newValue = null) {
@@ -266,7 +386,64 @@
             
             if (currentValue < 1) currentValue = 1;
             input.value = currentValue;
+            
+            // Atualizar preço baseado na quantidade
+            updatePriceForQuantity(currentValue);
         }
+
+        function updatePriceForQuantity(quantity) {
+            const product = window.productData;
+            if (!product || !product.quantityPrices || product.quantityPrices.length === 0) {
+                return;
+            }
+
+            // Encontrar a faixa de preço correspondente
+            let selectedPrice = null;
+            let selectedTier = null;
+
+            for (let tier of product.quantityPrices) {
+                if (quantity >= tier.min_quantity) {
+                    if (tier.max_quantity === null || quantity <= tier.max_quantity) {
+                        if (!selectedTier || tier.min_quantity > selectedTier.min_quantity) {
+                            selectedTier = tier;
+                            selectedPrice = tier.price;
+                        }
+                    }
+                }
+            }
+
+            // Se não encontrou faixa específica, usar preço padrão
+            if (selectedPrice === null) {
+                selectedPrice = product.price || 0;
+            }
+
+            // Atualizar exibição do preço
+            const priceDisplay = document.getElementById('price-display');
+            if (priceDisplay && selectedPrice > 0) {
+                const totalPrice = selectedPrice * quantity;
+                const pricePerUnit = selectedPrice;
+                
+                priceDisplay.innerHTML = `
+                    <div>
+                        <span class="text-2xl font-bold text-gray-600">Total: </span>
+                        <span class="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                            R$ ${totalPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </span>
+                    </div>
+                    <div class="text-sm text-gray-500 mt-1" id="price-per-unit">
+                        R$ ${pricePerUnit.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} por unidade
+                    </div>
+                `;
+            }
+        }
+
+        // Atualizar preço quando a página carregar
+        document.addEventListener('DOMContentLoaded', function() {
+            const qtyInput = document.getElementById('qty-input-{{ $product->id }}');
+            if (qtyInput) {
+                updatePriceForQuantity(parseInt(qtyInput.value) || 1);
+            }
+        });
 
         function addProductToCart(productId) {
             const product = window.productData;
@@ -274,15 +451,34 @@
 
             const quantity = parseInt(document.getElementById('qty-input-' + productId).value) || 1;
             
-            // Adicionar a quantidade especificada
-            for (let i = 0; i < quantity; i++) {
-                addToCart(
-                    product.id,
-                    product.name,
-                    product.slug,
-                    product.price,
-                    product.image
-                );
+            // Calcular preço baseado na quantidade
+            let priceToUse = product.price || 0;
+            if (product.quantityPrices && product.quantityPrices.length > 0) {
+                priceToUse = calculatePriceForQuantity(quantity, product.price, product.quantityPrices);
+            }
+            
+            // Adicionar ao carrinho com a quantidade e preço corretos
+            addToCart(
+                product.id,
+                product.name,
+                product.slug,
+                priceToUse,
+                product.image,
+                product.quantityPrices || null
+            );
+            
+            // Se a quantidade for maior que 1, adicionar itens adicionais
+            if (quantity > 1) {
+                for (let i = 1; i < quantity; i++) {
+                    addToCart(
+                        product.id,
+                        product.name,
+                        product.slug,
+                        priceToUse,
+                        product.image,
+                        product.quantityPrices || null
+                    );
+                }
             }
         }
 

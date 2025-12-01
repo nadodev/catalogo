@@ -1,8 +1,10 @@
 <?php
 
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
+use App\Http\Controllers\Admin\ColorController as AdminColorController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Admin\QuoteController as AdminQuoteController;
+use App\Http\Controllers\Admin\SizeController as AdminSizeController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DashboardController;
@@ -82,10 +84,26 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     // Products CRUD
     Route::delete('products/images/{image}', [AdminProductController::class, 'deleteImage'])->name('products.delete-image');
     Route::get('products/export-pdf', [AdminProductController::class, 'exportPdf'])->name('products.export-pdf');
-    Route::resource('products', AdminProductController::class);
+    
+    // Rotas explícitas para evitar conflito entre UPDATE e DELETE
+    // IMPORTANTE: Ordem das rotas importa - rotas mais específicas primeiro
+    Route::get('products/create', [AdminProductController::class, 'create'])->name('products.create');
+    Route::get('products/{product}/edit', [AdminProductController::class, 'edit'])->name('products.edit');
+    Route::put('products/{product}/update', [AdminProductController::class, 'update'])->name('products.update');
+    Route::patch('products/{product}/patch', [AdminProductController::class, 'update'])->name('products.update');
+    Route::delete('products/{product}/delete', [AdminProductController::class, 'destroy'])->name('products.destroy');
+    Route::get('products/{product}', [AdminProductController::class, 'show'])->name('products.show');
+    Route::post('products', [AdminProductController::class, 'store'])->name('products.store');
+    Route::get('products', [AdminProductController::class, 'index'])->name('products.index');
 
     // Categories CRUD
     Route::resource('categories', AdminCategoryController::class);
+
+    // Colors CRUD
+    Route::resource('colors', AdminColorController::class);
+
+    // Sizes CRUD
+    Route::resource('sizes', AdminSizeController::class);
 
     // Quotes CRUD
     Route::get('quotes', [AdminQuoteController::class, 'index'])->name('quotes.index');
