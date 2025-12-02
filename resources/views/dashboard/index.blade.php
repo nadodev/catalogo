@@ -125,7 +125,7 @@
                     @foreach($recentProducts as $product)
                     <div class="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
                         @if($product->images->count() > 0)
-                        <img src="{{ asset('storage/' . $product->images->first()->image_path) }}" 
+                        <img src="{{ $product->images->first()->url }}" 
                              alt="{{ $product->name }}"
                              class="w-16 h-16 object-cover rounded-lg">
                         @else

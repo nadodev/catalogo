@@ -130,7 +130,7 @@
             name: @json($product->name),
             slug: @json($product->slug),
             price: {{ $product->price ?? 0 }},
-            image: @if($product->images->count() > 0) @json(asset('storage/' . $product->images->first()->image_path)) @else null @endif
+            image: @if($product->images->count() > 0) @json($product->images->first()->url) @else null @endif
         };
         @endforeach
 

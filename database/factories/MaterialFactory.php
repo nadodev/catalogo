@@ -12,16 +12,13 @@ class MaterialFactory extends Factory
     public function definition(): array
     {
         $materials = [
-            'Plástico',
+            'Madeira',
             'Inox',
+            'Metal',
             'Alumínio',
             'Vidro',
-            'Madeira',
             'Cerâmica',
-            'Silicone',
-            'Acrílico',
-            'Papel Reciclado',
-            'Couro Sintético',
+            'Outros',
         ];
 
         $name = fake()->unique()->randomElement($materials);

@@ -13,13 +13,16 @@ class TagFactory extends Factory
     {
         $tags = [
             'Personalizado',
-            'Ecológico',
-            'Premium',
-            'Corporativo',
             'Promocional',
-            'Sustentável',
-            'Luxo',
-            'Econômico',
+            'Corporativo',
+            'Evento',
+            'Aniversário',
+            'Natal',
+            'Ano Novo',
+            'Dia dos Namorados',
+            'Dia dos Pais',
+            'Dia das Mães',
+            'Dia dos Pais',
         ];
 
         $name = fake()->unique()->randomElement($tags);

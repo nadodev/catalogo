@@ -35,7 +35,7 @@
                         <input type="hidden" name="product_id" value="{{ $product->id }}">
                         <div class="w-24 h-24 bg-white rounded-xl overflow-hidden flex-shrink-0 border border-blue-200">
                             @if($product->images->count() > 0)
-                                <img src="{{ asset('storage/' . $product->images->first()->image_path) }}" alt="{{ $product->name }}" class="w-full h-full object-cover">
+                                <img src="{{ $product->images->first()->url }}" alt="{{ $product->name }}" class="w-full h-full object-cover">
                             @else
                                 <div class="w-full h-full flex items-center justify-center text-gray-300">
                                     <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">

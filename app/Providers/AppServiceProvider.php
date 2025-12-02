@@ -19,6 +19,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // Configurar paginação para português
+        \Illuminate\Pagination\Paginator::defaultView('pagination.custom');
+        \Illuminate\Pagination\Paginator::defaultSimpleView('pagination.simple');
     }
 }

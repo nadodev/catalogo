@@ -2,8 +2,8 @@
 
 namespace Database\Factories;
 
-use App\Models\ProductImage;
 use App\Models\Product;
+use App\Models\ProductImage;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class ProductImageFactory extends Factory
@@ -14,7 +14,7 @@ class ProductImageFactory extends Factory
     {
         return [
             'product_id' => Product::factory(),
-            'image_path' => 'products/placeholder-' . fake()->numberBetween(1, 5) . '.jpg',
+            'image_path' => 'product-placeholder.svg',
             'order' => 0,
             'is_primary' => false,
         ];

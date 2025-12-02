@@ -10,7 +10,7 @@ class HomeController extends Controller
             ->with(['category', 'images'])
             ->active()
             ->featured()
-            ->limit(8)
+            ->limit(4)
             ->get();
 
         // Buscar produto em destaque para a hero (com imagem)

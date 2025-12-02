@@ -11,15 +11,15 @@ class UserSeeder extends Seeder
     public function run(): void
     {
         User::firstOrCreate(
-            ['email' => 'admin@lumez.com.br'],
+            ['email' => 'nadojba@hotmail.com'],
             [
                 'name' => 'Administrador',
-                'password' => Hash::make('admin123'),
+                'password' => Hash::make('nado2536'),
             ]
         );
 
         $this->command->info('Usuário admin criado!');
-        $this->command->info('Email: admin@lumez.com.br');
-        $this->command->info('Senha: admin123');
+        $this->command->info('Email: nadojba@hotmail.com');
+        $this->command->info('Senha: nado2536');
     }
 }

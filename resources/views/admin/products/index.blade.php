@@ -56,7 +56,7 @@
                 <tr class="hover:bg-gray-50">
                     <td class="px-6 py-4 whitespace-nowrap">
                         @if($product->images->count() > 0)
-                            <img src="{{ asset('storage/' . $product->images->first()->image_path) }}" 
+                            <img src="{{ $product->images->first()->url }}" 
                                  alt="{{ $product->name }}"
                                  class="w-16 h-16 object-cover rounded-lg">
                         @else

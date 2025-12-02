@@ -18,14 +18,79 @@ class DatabaseSeeder extends Seeder
         // Create admin user
         $this->call(UserSeeder::class);
 
-        // Create categories
-        $categories = \App\Models\Category::factory(8)->create();
+        // Create categories (usando firstOrCreate para evitar duplicatas)
+        $categoryNames = [
+            'Copos Personalizadas',
+            'Canecas Personalizadas',
+            'Garrafas Térmicas Personalizadas',
+            'Squeezes Personalizados',
+            'Canetas Personalizadas',
+            'Brindes Personalizados',
+            'Agendas Personalizadas',
+            'Cadernos Personalizados',
+        ];
 
-        // Create tags
-        $tags = \App\Models\Tag::factory(8)->create();
+        $categories = collect();
+        foreach ($categoryNames as $index => $name) {
+            $categories->push(
+                \App\Models\Category::firstOrCreate(
+                    ['slug' => \Illuminate\Support\Str::slug($name)],
+                    [
+                        'name' => $name,
+                        'description' => fake()->paragraph(),
+                        'image' => null,
+                        'is_active' => true,
+                        'order' => $index + 1,
+                    ]
+                )
+            );
+        }
 
-        // Create materials
-        $materials = \App\Models\Material::factory(10)->create();
+        // Create tags (usando firstOrCreate para evitar duplicatas)
+        $tagNames = [
+            'Personalizado',
+            'Ecológico',
+            'Premium',
+            'Promocional',
+            'Corporativo',
+            'Evento',
+            'Brinde',
+            'Presente',
+        ];
+
+        $tags = collect();
+        foreach ($tagNames as $name) {
+            $tags->push(
+                \App\Models\Tag::firstOrCreate(
+                    ['slug' => \Illuminate\Support\Str::slug($name)],
+                    ['name' => $name]
+                )
+            );
+        }
+
+        // Create materials (usando firstOrCreate para evitar duplicatas)
+        $materialNames = [
+            'Madeira',
+            'Inox',
+            'Metal',
+            'Alumínio',
+            'Vidro',
+            'Cerâmica',
+            'Plástico',
+            'Bambu',
+            'Silicone',
+            'Tecido',
+        ];
+
+        $materials = collect();
+        foreach ($materialNames as $name) {
+            $materials->push(
+                \App\Models\Material::firstOrCreate(
+                    ['slug' => \Illuminate\Support\Str::slug($name)],
+                    ['name' => $name]
+                )
+            );
+        }
 
         // Create products with images and relationships
         foreach ($categories as $category) {

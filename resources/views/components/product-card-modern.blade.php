@@ -5,11 +5,11 @@
     <div class="relative aspect-square overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100">
         <a href="{{ route('products.show', $product->slug) }}" class="block w-full h-full">
             @if($product->images->count() > 0)
-                <img src="{{ asset('storage/' . $product->images->first()->image_path) }}" 
+                <img src="{{ $product->images->first()->url }}" 
                      alt="{{ $product->name }}"
                      class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
             @else
-                <img src="{{ asset('images/product-placeholder.svg') }}" 
+                <img src="{{ asset('storage/images/product-placeholder.svg') }}" 
                      alt="{{ $product->name }}"
                      class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
             @endif
@@ -86,7 +86,7 @@
                 <label class="text-xs font-semibold text-gray-600">Qtd:</label>
                 <div class="flex items-center border-2 border-gray-200 rounded-xl flex-1 hover:border-blue-400 transition-colors">
                     <button onclick="updateProductQuantityCard({{ $product->id }}, -1)" 
-                            class="px-3 py-2 text-gray-600 hover:bg-gray-50 hover:text-blue-600 transition-colors rounded-l-xl" 
+                            class="cursor-pointer px-3 py-2 text-gray-600 hover:bg-gray-50 hover:text-blue-600 transition-colors rounded-l-xl" 
                             id="qty-decrease-card-{{ $product->id }}">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
@@ -99,7 +99,7 @@
                            class="w-full text-center border-0 focus:ring-0 text-sm font-bold bg-transparent"
                            onchange="updateProductQuantityCard({{ $product->id }}, 0, this.value)">
                     <button onclick="updateProductQuantityCard({{ $product->id }}, 1)" 
-                            class="px-3 py-2 text-gray-600 hover:bg-gray-50 hover:text-blue-600 transition-colors rounded-r-xl"
+                            class="cursor-pointer px-3 py-2 text-gray-600 hover:bg-gray-50 hover:text-blue-600 transition-colors rounded-r-xl"
                             id="qty-increase-card-{{ $product->id }}">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
@@ -119,7 +119,7 @@
                 </a>
                 
                 <button onclick="addProductToCartCard({{ $product->id }})" 
-                        class="flex-1 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-semibold hover:shadow-lg hover:scale-105 transition-all flex items-center justify-center gap-1.5">
+                        class="cursor-pointer flex-1 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-semibold hover:shadow-lg hover:scale-105 transition-all flex items-center justify-center gap-1.5">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
                     </svg>
@@ -131,7 +131,7 @@
         <!-- Apenas botão de detalhes -->
         <div class="pt-4 border-t border-gray-100">
             <a href="{{ route('products.show', $product->slug) }}" 
-               class="block w-full px-4 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-semibold hover:shadow-lg hover:scale-105 transition-all text-center text-sm">
+               class="cursor-pointer block w-full px-4 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-semibold hover:shadow-lg hover:scale-105 transition-all text-center text-sm">
                 Ver Detalhes
             </a>
         </div>

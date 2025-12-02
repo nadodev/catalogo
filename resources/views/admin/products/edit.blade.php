@@ -124,7 +124,7 @@
             <div class="grid grid-cols-4 gap-4">
                 @foreach($product->images as $image)
                 <div class="relative">
-                    <img src="{{ asset('storage/' . $image->image_path) }}" alt="Imagem" class="w-full h-32 object-cover rounded-lg">
+                    <img src="{{ $image->url }}" alt="Imagem" class="w-full h-32 object-cover rounded-lg">
                     <a href="{{ route('admin.products.delete-image', $image->id) }}" 
                        onclick="return confirm('Tem certeza?')"
                        class="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full hover:bg-red-600">

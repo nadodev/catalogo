@@ -4,7 +4,7 @@
     <div class="relative">
         <a href="{{ route('products.show', $product->slug) }}" class="product-card-image block">
             @if($product->images->count() > 0)
-                <img src="{{ asset('storage/' . $product->images->first()->image_path) }}" 
+                <img src="{{ $product->images->first()->url }}" 
                      alt="{{ $product->name }}"
                      loading="lazy">
             @else

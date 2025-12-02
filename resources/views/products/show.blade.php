@@ -24,10 +24,10 @@
             <div class="space-y-4">
                 <div class="aspect-square bg-gray-100 rounded-2xl overflow-hidden border border-gray-100 relative group">
                     @if($product->images->count() > 0)
-                        <img id="main-image" src="{{ asset('storage/' . $product->images->first()->image_path) }}" 
+                        <img id="main-image" src="{{ $product->images->first()->url }}" 
                              alt="{{ $product->name }}" 
                              class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 cursor-zoom-in"
-                             onclick="openImageModal('{{ asset('storage/' . $product->images->first()->image_path) }}')">
+                             onclick="openImageModal('{{ $product->images->first()->url }}')">
                     @else
                         <img id="main-image" src="{{ asset('images/product-placeholder.svg') }}" 
                              alt="{{ $product->name }}" 
@@ -46,7 +46,7 @@
 
                     <!-- Botão de zoom/fullscreen -->
                     @if($product->images->count() > 0)
-                    <button onclick="openImageModal('{{ asset('storage/' . $product->images->first()->image_path) }}')" 
+                    <button onclick="openImageModal('{{ $product->images->first()->url }}')" 
                             class="absolute bottom-4 right-4 p-3 bg-white/90 backdrop-blur-sm rounded-full shadow-lg hover:bg-white transition-all z-10">
                         <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7"/>
@@ -58,9 +58,9 @@
                 @if($product->images->count() > 1)
                 <div class="grid grid-cols-4 gap-4">
                     @foreach($product->images as $index => $image)
-                    <button onclick="changeMainImage('{{ asset('storage/' . $image->image_path) }}')" 
+                    <button onclick="changeMainImage('{{ $image->url }}')" 
                             class="aspect-square bg-gray-100 rounded-xl overflow-hidden border-2 border-transparent hover:border-blue-500 focus:border-blue-500 transition-all group relative">
-                        <img src="{{ asset('storage/' . $image->image_path) }}" 
+                        <img src="{{ $image->url }}" 
                              alt="{{ $product->name }}" 
                              class="w-full h-full object-cover group-hover:scale-110 transition-transform">
                         <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors"></div>
@@ -193,7 +193,7 @@
                     <div class="relative aspect-square overflow-hidden bg-gray-100">
                         <a href="{{ route('products.show', $related->slug) }}">
                             @if($related->images->count() > 0)
-                                <img src="{{ asset('storage/' . $related->images->first()->image_path) }}" 
+                                <img src="{{ $related->images->first()->url }}" 
                                      alt="{{ $related->name }}"
                                      class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
                             @else
@@ -251,7 +251,7 @@
             name: '{{ addslashes($product->name) }}',
             slug: '{{ $product->slug }}',
             price: {{ $product->price ?? 0 }},
-            image: @if($product->images->count() > 0) '{{ asset('storage/' . $product->images->first()->image_path) }}' @else null @endif
+            image: @if($product->images->count() > 0) '{{ $product->images->first()->url }}' @else null @endif
         };
 
         function updateProductQuantity(productId, change, newValue = null) {
