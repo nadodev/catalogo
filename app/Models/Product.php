@@ -145,4 +145,60 @@ class Product extends Model
     {
         return $this->belongsToMany(User::class, 'favorites')->withTimestamps();
     }
+
+    public function variants(): HasMany
+    {
+        return $this->hasMany(ProductVariant::class);
+    }
+
+    public function activeVariants(): HasMany
+    {
+        return $this->hasMany(ProductVariant::class)->where('is_active', true);
+    }
+
+    public function colors(): BelongsToMany
+    {
+        return $this->belongsToMany(Color::class, 'product_variants')
+            ->wherePivot('is_active', true)
+            ->distinct();
+    }
+
+    public function sizes(): BelongsToMany
+    {
+        return $this->belongsToMany(Size::class, 'product_variants')
+            ->wherePivot('is_active', true)
+            ->distinct();
+    }
+
+    public function quantityPrices(): HasMany
+    {
+        return $this->hasMany(ProductQuantityPrice::class)->where('is_active', true)->orderBy('min_quantity');
+    }
+
+    public function allQuantityPrices(): HasMany
+    {
+        return $this->hasMany(ProductQuantityPrice::class)->orderBy('min_quantity');
+    }
+
+    /**
+     * Obtém o preço baseado na quantidade
+     */
+    public function getPriceForQuantity(int $quantity): ?float
+    {
+        $priceTier = $this->quantityPrices()
+            ->where('min_quantity', '<=', $quantity)
+            ->where(function ($query) use ($quantity) {
+                $query->whereNull('max_quantity')
+                    ->orWhere('max_quantity', '>=', $quantity);
+            })
+            ->orderBy('min_quantity', 'desc')
+            ->first();
+
+        if ($priceTier) {
+            return (float) $priceTier->price;
+        }
+
+        // Se não encontrar faixa específica, retorna o preço padrão
+        return $this->price ? (float) $this->price : null;
+    }
 }

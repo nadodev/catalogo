@@ -253,19 +253,49 @@ window.showFavoriteToast = function (favorited, productName) {
 };
 
 // Cart System
-window.addToCart = function (productId, productName, productSlug, productPrice, productImage) {
+// Função para calcular preço baseado na quantidade
+window.calculatePriceForQuantity = function (quantity, basePrice, quantityPrices) {
+    if (!quantityPrices || quantityPrices.length === 0) {
+        return basePrice || 0;
+    }
+
+    // Encontrar a faixa de preço correspondente
+    let selectedPrice = basePrice || 0;
+    let selectedTier = null;
+
+    for (let tier of quantityPrices) {
+        if (quantity >= tier.min_quantity) {
+            if (tier.max_quantity === null || quantity <= tier.max_quantity) {
+                if (!selectedTier || tier.min_quantity > selectedTier.min_quantity) {
+                    selectedTier = tier;
+                    selectedPrice = tier.price;
+                }
+            }
+        }
+    }
+
+    return selectedPrice;
+};
+
+window.addToCart = function (productId, productName, productSlug, productPrice, productImage, quantityPrices = null) {
     let cart = JSON.parse(localStorage.getItem('cart') || '[]');
     const existingItem = cart.find(item => item.id === productId);
 
     if (existingItem) {
         existingItem.quantity += 1;
+        // Recalcular preço baseado na nova quantidade
+        if (existingItem.quantityPrices) {
+            existingItem.price = calculatePriceForQuantity(existingItem.quantity, existingItem.basePrice, existingItem.quantityPrices);
+        }
     } else {
         cart.push({
             id: productId,
             name: productName,
             slug: productSlug,
-            price: productPrice,
+            basePrice: productPrice, // Preço base original
+            price: productPrice, // Preço atual (pode mudar com quantidade)
             image: productImage,
+            quantityPrices: quantityPrices || null, // Faixas de preço por quantidade
             quantity: 1,
             addedAt: new Date().toISOString()
         });
@@ -296,6 +326,12 @@ window.updateCartQuantity = function (productId, quantity) {
     const item = cart.find(item => item.id === productId);
     if (item) {
         item.quantity = parseInt(quantity);
+        
+        // Recalcular preço baseado na nova quantidade
+        if (item.quantityPrices && item.quantityPrices.length > 0) {
+            item.price = calculatePriceForQuantity(item.quantity, item.basePrice || item.price, item.quantityPrices);
+        }
+        
         localStorage.setItem('cart', JSON.stringify(cart));
         updateCartCount();
         if (typeof renderCart === 'function') {
