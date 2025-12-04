@@ -74,18 +74,26 @@
         
         .product-image-container {
             width: 100%;
-            height: 90px;
+            height: 100px;
             margin-bottom: 4px;
             overflow: hidden;
             border-radius: 3px;
             background: #f3f4f6;
             flex-shrink: 0;
+            display: table-cell;
+            vertical-align: middle;
+            text-align: center;
+            position: relative;
         }
         
         .product-image {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
+            max-width: 100%;
+            max-height: 100px;
+            width: auto;
+            height: auto;
+            /* Remover object-fit para melhor compatibilidade com DomPDF */
+            display: inline-block;
+            vertical-align: middle;
         }
         
         .no-image {
@@ -248,13 +256,20 @@
                         <!-- Imagem -->
                         <div class="product-image-container">
                             @if($product->images->count() > 0)
-                                <img src="{{ public_path('storage/' . $product->images->first()->image_path) }}" 
-                                     alt="{{ $product->name }}" 
-                                     class="product-image">
+                                @php
+                                    $imagePath = $product->images->first()->image_path;
+                                    $fullPath = public_path('storage/' . $imagePath);
+                                @endphp
+                                @if(file_exists($fullPath))
+                                    <img src="{{ $fullPath }}" 
+                                         alt="{{ $product->name }}" 
+                                         class="product-image"
+                                         style="max-width: 100%; max-height: 100px; width: auto; height: auto; display: inline-block; vertical-align: middle;">
+                                @else
+                                    <div class="no-image">Sem imagem</div>
+                                @endif
                             @else
-                                <img src="{{ public_path('images/product-placeholder.svg') }}" 
-                                     alt="{{ $product->name }}" 
-                                     class="product-image">
+                                <div class="no-image">Sem imagem</div>
                             @endif
                         </div>
                         
