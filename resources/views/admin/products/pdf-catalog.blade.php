@@ -80,10 +80,8 @@
             border-radius: 3px;
             background: #f3f4f6;
             flex-shrink: 0;
-            display: table-cell;
-            vertical-align: middle;
             text-align: center;
-            position: relative;
+            line-height: 100px;
         }
         
         .product-image {
@@ -91,9 +89,8 @@
             max-height: 100px;
             width: auto;
             height: auto;
-            /* Remover object-fit para melhor compatibilidade com DomPDF */
-            display: inline-block;
             vertical-align: middle;
+            display: inline-block;
         }
         
         .no-image {
