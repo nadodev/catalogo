@@ -73,11 +73,11 @@
         .product-card {
             border: 1px solid #d1d5db;
             border-radius: 4px;
-            padding: 8px;
+            padding: 6px;
             background: #ffffff;
-            width: 30.5%;
+            width: 30%;
             float: left;
-            margin-right: 4.25%;
+            margin-right: 5%;
             min-height: 220px;
             page-break-inside: avoid;
             box-sizing: border-box;
