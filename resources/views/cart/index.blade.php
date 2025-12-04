@@ -78,6 +78,8 @@
             }
 
             let totalItems = 0;
+            let totalValue = 0;
+            let hasItemsWithoutPrice = false;
             let html = `
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     <div class="lg:col-span-2 space-y-4">
@@ -95,6 +97,13 @@
                 }
                 
                 const itemTotal = itemPrice * item.quantity;
+                
+                // Calcular total do valor
+                if (itemPrice > 0) {
+                    totalValue += itemTotal;
+                } else {
+                    hasItemsWithoutPrice = true;
+                }
                 html += `
                     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                         <div class="flex gap-4">
@@ -156,6 +165,17 @@
                                     <span>Total de itens:</span>
                                     <span class="font-semibold">${totalItems}</span>
                                 </div>
+                                <div class="flex justify-between text-gray-600">
+                                    <span>Total do valor:</span>
+                                    <span class="font-semibold text-lg ${totalValue > 0 ? 'text-gray-900' : 'text-blue-600'}">
+                                        ${totalValue > 0 ? `R$ ${totalValue.toFixed(2).replace('.', ',')}` : 'Sob Consulta'}
+                                    </span>
+                                </div>
+                                ${hasItemsWithoutPrice && totalValue > 0 ? `
+                                <div class="text-xs text-gray-500 italic">
+                                    * Alguns itens não possuem preço definido
+                                </div>
+                                ` : ''}
                             </div>
                             
                             <div class="space-y-4">
