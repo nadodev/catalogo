@@ -111,7 +111,7 @@
             margin-bottom: 8px;
             overflow: hidden;
             border-radius: 3px;
-            background: #f3f4f6;
+            background: #fff;
             text-align: center;
             line-height: 140px;
         }
