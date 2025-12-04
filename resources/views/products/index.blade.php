@@ -146,7 +146,19 @@
             name: @json($product->name),
             slug: @json($product->slug),
             price: {{ $product->price ?? 0 }},
-            image: @if($product->images->count() > 0) @json($product->images->first()->url) @else null @endif
+            image: @if($product->images->count() > 0) @json($product->images->first()->url) @else null @endif,
+            hasStock: {{ $product->hasStock() ? 'true' : 'false' }},
+            variants: [
+                @foreach($product->variants->where('is_active', true) as $variant)
+                {
+                    id: {{ $variant->id }},
+                    colorId: {{ $variant->color_id ?? 'null' }},
+                    sizeId: {{ $variant->size_id ?? 'null' }},
+                    stock: {{ $variant->stock ?? 'null' }},
+                    hasStock: {{ ($variant->stock === null || $variant->stock > 0) ? 'true' : 'false' }}
+                }@if(!$loop->last),@endif
+                @endforeach
+            ]
         };
         @endforeach
 
@@ -170,6 +182,12 @@
             const product = window.productsData[productId];
             if (!product) {
                 console.error('Produto não encontrado:', productId);
+                return;
+            }
+
+            // Verificar se o produto tem estoque
+            if (!product.hasStock) {
+                alert('Este produto está sem estoque disponível.');
                 return;
             }
 

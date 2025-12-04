@@ -299,13 +299,18 @@
                         </div>
                     </div>
 
+                    @php
+                        $hasStock = $product->hasStock();
+                    @endphp
                     <div class="flex flex-col sm:flex-row gap-4">
                         <button onclick="addProductToCart({{ $product->id }})" 
-                                class="flex-1 px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-bold text-center hover:shadow-lg hover:scale-105 transition-all flex items-center justify-center gap-2">
+                                @if(!$hasStock) disabled @endif
+                                id="add-cart-btn-{{ $product->id }}"
+                                class="@if($hasStock) flex-1 px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-bold text-center hover:shadow-lg hover:scale-105 transition-all flex items-center justify-center gap-2 @else flex-1 px-8 py-4 bg-gray-300 text-gray-500 rounded-xl font-bold text-center cursor-not-allowed flex items-center justify-center gap-2 @endif">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
                             </svg>
-                            <span>Adicionar ao Carrinho</span>
+                            <span>@if($hasStock) Adicionar ao Carrinho @else Sem Estoque @endif</span>
                         </button>
                         
                         <button onclick="toggleFavorite({{ $product->id }}, '{{ addslashes($product->name) }}')" 
@@ -409,6 +414,7 @@
                     sizeId: {{ $variant->size_id ?? 'null' }},
                     price: {{ $variant->price ?? 'null' }},
                     stock: {{ $variant->stock ?? 'null' }},
+                    hasStock: {{ ($variant->stock === null || $variant->stock > 0) ? 'true' : 'false' }},
                     sku: '{{ $variant->sku ?? '' }}'
                 }@if(!$loop->last),@endif
                 @endforeach
@@ -465,6 +471,7 @@
             // Atualizar variante selecionada e preço
             updateSelectedVariant();
             updatePriceDisplay();
+            updateAddToCartButton();
         }
 
         function selectVariantSize(sizeId) {
@@ -486,6 +493,36 @@
             // Atualizar variante selecionada e preço
             updateSelectedVariant();
             updatePriceDisplay();
+            updateAddToCartButton();
+        }
+
+        function updateAddToCartButton() {
+            const product = window.productData;
+            if (!product) return;
+
+            const addBtn = document.getElementById('add-cart-btn-{{ $product->id }}');
+            if (!addBtn) return;
+
+            let hasStock = product.hasStock;
+            
+            // Se há variante selecionada, verificar estoque específico
+            if (selectedVariant) {
+                hasStock = selectedVariant.hasStock !== false;
+                
+                if (selectedVariant.stock !== null && selectedVariant.stock <= 0) {
+                    hasStock = false;
+                }
+            }
+
+            if (hasStock) {
+                addBtn.disabled = false;
+                addBtn.className = 'flex-1 px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-bold text-center hover:shadow-lg hover:scale-105 transition-all flex items-center justify-center gap-2';
+                addBtn.querySelector('span').textContent = 'Adicionar ao Carrinho';
+            } else {
+                addBtn.disabled = true;
+                addBtn.className = 'flex-1 px-8 py-4 bg-gray-300 text-gray-500 rounded-xl font-bold text-center cursor-not-allowed flex items-center justify-center gap-2';
+                addBtn.querySelector('span').textContent = 'Sem Estoque';
+            }
         }
 
         function updateSelectedVariant() {
@@ -517,6 +554,7 @@
         function updatePriceDisplay() {
             const quantity = parseInt(document.getElementById('qty-input-{{ $product->id }}')?.value) || 1;
             updatePriceForQuantity(quantity);
+            updateAddToCartButton();
         }
 
         function updatePriceForQuantity(quantity) {
@@ -595,7 +633,33 @@
             const product = window.productData;
             if (!product || product.id !== productId) return;
 
+            // Verificar estoque
+            let hasStock = product.hasStock;
+            
+            // Se há variante selecionada, verificar estoque específico da variante
+            if (selectedVariant) {
+                hasStock = selectedVariant.hasStock !== false;
+                
+                // Verificar se a variante tem estoque suficiente
+                if (selectedVariant.stock !== null && selectedVariant.stock <= 0) {
+                    hasStock = false;
+                }
+            }
+            
+            if (!hasStock) {
+                alert('Este produto está sem estoque disponível.');
+                return;
+            }
+
             const quantity = parseInt(document.getElementById('qty-input-' + productId).value) || 1;
+            
+            // Se há variante selecionada, verificar se a quantidade não excede o estoque
+            if (selectedVariant && selectedVariant.stock !== null) {
+                if (quantity > selectedVariant.stock) {
+                    alert(`Estoque disponível: ${selectedVariant.stock} unidade(s).`);
+                    return;
+                }
+            }
             
             // Determinar preço base
             let basePrice = product.price || 0;

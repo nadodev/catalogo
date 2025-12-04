@@ -201,4 +201,77 @@ class Product extends Model
         // Se não encontrar faixa específica, retorna o preço padrão
         return $this->price ? (float) $this->price : null;
     }
+
+    /**
+     * Verifica se o produto tem estoque disponível
+     * Se o produto tem variantes, verifica se pelo menos uma variante tem estoque
+     */
+    public function hasStock(): bool
+    {
+        // Se o produto tem variantes, verificar se alguma tem estoque
+        if ($this->variants()->where('is_active', true)->count() > 0) {
+            // Verificar se pelo menos uma variante tem estoque > 0 ou estoque null (ilimitado)
+            $hasStock = $this->variants()
+                ->where('is_active', true)
+                ->where(function ($query) {
+                    $query->whereNull('stock')
+                        ->orWhere('stock', '>', 0);
+                })
+                ->exists();
+            
+            return $hasStock;
+        }
+
+        // Se não tem variantes, considerar que tem estoque (produto sem controle de estoque)
+        // Ou você pode adicionar um campo stock no produto se necessário
+        return true;
+    }
+
+    /**
+     * Verifica se uma variante específica tem estoque disponível
+     */
+    public function hasVariantStock(?int $colorId = null, ?int $sizeId = null): bool
+    {
+        if ($colorId === null && $sizeId === null) {
+            return $this->hasStock();
+        }
+
+        $variant = $this->variants()
+            ->where('is_active', true)
+            ->when($colorId !== null, function ($query) use ($colorId) {
+                return $query->where('color_id', $colorId);
+            })
+            ->when($sizeId !== null, function ($query) use ($sizeId) {
+                return $query->where('size_id', $sizeId);
+            })
+            ->first();
+
+        if (!$variant) {
+            return false;
+        }
+
+        // Se stock é null, considera estoque ilimitado
+        if ($variant->stock === null) {
+            return true;
+        }
+
+        return $variant->stock > 0;
+    }
+
+    /**
+     * Obtém o estoque total do produto (soma de todas as variantes)
+     */
+    public function getTotalStock(): ?int
+    {
+        if ($this->variants()->where('is_active', true)->count() === 0) {
+            return null; // Sem controle de estoque
+        }
+
+        $totalStock = $this->variants()
+            ->where('is_active', true)
+            ->whereNotNull('stock')
+            ->sum('stock');
+
+        return $totalStock > 0 ? (int) $totalStock : 0;
+    }
 }
