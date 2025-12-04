@@ -16,6 +16,9 @@
             color: #1a1a1a;
             line-height: 1.4;
             font-size: 10px;
+            margin: 0;
+            padding: 0;
+            width: 100%;
         }
         
         .header {
@@ -64,17 +67,17 @@
             width: 100%;
             margin-bottom: 10px;
             page-break-inside: avoid;
-            overflow: hidden;
+            overflow: visible;
         }
         
         .product-card {
             border: 1px solid #d1d5db;
             border-radius: 4px;
-            padding: 10px;
+            padding: 8px;
             background: #ffffff;
-            width: 32%;
+            width: 30.5%;
             float: left;
-            margin-right: 2%;
+            margin-right: 4.25%;
             min-height: 220px;
             page-break-inside: avoid;
             box-sizing: border-box;
@@ -86,6 +89,14 @@
         
         .product-card:last-child {
             margin-right: 0;
+        }
+        
+        .product-row {
+            width: 100%;
+            margin-bottom: 10px;
+            page-break-inside: avoid;
+            overflow: visible;
+            clear: both;
         }
         
         .product-row::after {
