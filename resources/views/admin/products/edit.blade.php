@@ -402,8 +402,8 @@
                 }
                 
                 // QUARTA VERIFICAÇÃO: Se tem método DELETE e não tem flag _update, pode ser delete de imagem
-                const methodInput = targetForm.querySelector('input[name="_method"]');
-                if (methodInput && methodInput.value === 'DELETE' && !targetForm.querySelector('input[name="_update"]')) {
+                const checkMethodInput = targetForm.querySelector('input[name="_method"]');
+                if (checkMethodInput && checkMethodInput.value === 'DELETE' && !targetForm.querySelector('input[name="_update"]')) {
                     console.log('⚠️ Submit com método DELETE sem flag _update - deixando passar (delete imagem)');
                     return; // Deixar o submit normal acontecer
                 }
