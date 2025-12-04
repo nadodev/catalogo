@@ -11,7 +11,7 @@ class AdminOnly
 {
     public function handle(Request $request, Closure $next): Response
     {
-        if (!Auth::check() || Auth::user()->email !== 'admin@lumez.com.br') {
+        if (! Auth::check() || Auth::user()->email !== 'nadojba@hotmail.com') {
             abort(403, 'Acesso negado. Apenas administradores podem acessar esta área.');
         }
 
