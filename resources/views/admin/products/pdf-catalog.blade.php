@@ -75,7 +75,7 @@
             border-radius: 4px;
             padding: 6px;
             background: #ffffff;
-            width: 30%;
+            width: 27%;
             float: left;
             margin-right: 5%;
             min-height: 220px;
