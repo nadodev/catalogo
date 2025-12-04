@@ -73,7 +73,99 @@
         @if($quote->notes)
         <div class="mt-6">
             <h3 class="text-sm font-medium text-gray-500 mb-2">Observações</h3>
-            <p class="text-gray-900 bg-gray-50 p-4 rounded-lg">{{ $quote->notes }}</p>
+            <div class="bg-gray-50 p-4 rounded-lg">
+                @php
+                    $notes = $quote->notes;
+                    $cartItems = null;
+                    
+                    // Tentar extrair JSON de produtos do carrinho
+                    if (preg_match('/Produtos do carrinho:\s*(\[[\s\S]*?\])/i', $notes, $matches)) {
+                        try {
+                            $cartItems = json_decode($matches[1], true);
+                            // Remover a parte do JSON das observações
+                            $notes = preg_replace('/\n\nProdutos do carrinho:[\s\S]*$/i', '', $notes);
+                            $notes = trim($notes);
+                        } catch (\Exception $e) {
+                            // Se não conseguir parsear, manter como está
+                        }
+                    }
+                @endphp
+                
+                @if(!empty($notes))
+                    <div class="text-gray-900 mb-4 whitespace-pre-wrap">{{ $notes }}</div>
+                @endif
+                
+                @if($cartItems && is_array($cartItems) && count($cartItems) > 0)
+                    <div class="mt-4">
+                        <h4 class="text-sm font-semibold text-gray-700 mb-3">Produtos do Carrinho</h4>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200 bg-white rounded-lg shadow-sm">
+                                <thead class="bg-gradient-to-r from-blue-600 to-purple-600">
+                                    <tr>
+                                        <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">Produto</th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-white uppercase tracking-wider">Quantidade</th>
+                                        <th class="px-4 py-3 text-right text-xs font-semibold text-white uppercase tracking-wider">Preço Unitário</th>
+                                        <th class="px-4 py-3 text-right text-xs font-semibold text-white uppercase tracking-wider">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    @php
+                                        $grandTotal = 0;
+                                    @endphp
+                                    @foreach($cartItems as $item)
+                                        @php
+                                            $price = $item['price'] ?? 0;
+                                            $quantity = $item['quantity'] ?? 1;
+                                            $itemTotal = $price * $quantity;
+                                            $grandTotal += $itemTotal;
+                                        @endphp
+                                        <tr class="hover:bg-gray-50">
+                                            <td class="px-4 py-3 text-sm text-gray-900">
+                                                {{ $item['name'] ?? 'Produto' }}
+                                            </td>
+                                            <td class="px-4 py-3 text-sm text-center text-gray-700">
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                                    {{ $quantity }}
+                                                </span>
+                                            </td>
+                                            <td class="px-4 py-3 text-sm text-right text-gray-700">
+                                                @if($price > 0)
+                                                    R$ {{ number_format($price, 2, ',', '.') }}
+                                                @else
+                                                    <span class="text-blue-600 font-medium">Sob Consulta</span>
+                                                @endif
+                                            </td>
+                                            <td class="px-4 py-3 text-sm text-right font-semibold text-gray-900">
+                                                @if($price > 0)
+                                                    R$ {{ number_format($itemTotal, 2, ',', '.') }}
+                                                @else
+                                                    <span class="text-blue-600">Sob Consulta</span>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                                <tfoot class="bg-gray-50">
+                                    <tr>
+                                        <td colspan="3" class="px-4 py-3 text-right text-sm font-bold text-gray-700">
+                                            Total Geral:
+                                        </td>
+                                        <td class="px-4 py-3 text-right text-lg font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                                            @if($grandTotal > 0)
+                                                R$ {{ number_format($grandTotal, 2, ',', '.') }}
+                                            @else
+                                                <span class="text-blue-600">Sob Consulta</span>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                @else
+                    <div class="text-gray-900 whitespace-pre-wrap">{{ $quote->notes }}</div>
+                @endif
+            </div>
         </div>
         @endif
 
