@@ -44,6 +44,7 @@ Route::get('/carrinho/finalizar', function () {
     return view('cart.checkout');
 })->name('cart.checkout');
 Route::post('/carrinho/orcamento', [QuoteController::class, 'storeFromCart'])->name('cart.quote');
+Route::get('/carrinho/confirmacao', [QuoteController::class, 'confirmation'])->name('cart.confirmation');
 
 // Favorites (apenas para usuários logados)
 Route::get('/favoritos', [FavoriteController::class, 'index'])->middleware('auth')->name('favorites.index');

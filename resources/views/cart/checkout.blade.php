@@ -223,9 +223,29 @@
                     (formData.get('notes') ? `\n\nObservações: ${formData.get('notes')}` : '')
                 );
                 
+                // Abrir WhatsApp
                 window.open(`https://wa.me/5511999999999?text=${message}`, '_blank');
-                clearCart();
-                window.location.href = '{{ route('cart.index') }}';
+                
+                // Salvar dados do pedido na sessão via AJAX
+                const formDataToSend = new FormData();
+                formDataToSend.append('name', formData.get('name'));
+                formDataToSend.append('email', formData.get('email'));
+                formDataToSend.append('phone', formData.get('phone'));
+                formDataToSend.append('notes', formData.get('notes') || '');
+                formDataToSend.append('cart_items', JSON.stringify(cartData));
+                formDataToSend.append('contact_method', 'whatsapp');
+                formDataToSend.append('_token', '{{ csrf_token() }}');
+                
+                fetch('{{ route('cart.quote') }}', {
+                    method: 'POST',
+                    body: formDataToSend
+                }).then(() => {
+                    clearCart();
+                    window.location.href = '{{ route('cart.confirmation') }}';
+                }).catch(() => {
+                    clearCart();
+                    window.location.href = '{{ route('cart.confirmation') }}';
+                });
             }
         });
 
