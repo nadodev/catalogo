@@ -335,8 +335,11 @@
                 </div>
                 @endif
 
-                <!-- Descrição do Produto -->
-                @if($product->description)
+               
+            </div>
+        </div>
+ <!-- Descrição do Produto -->
+ @if($product->description)
                 <div class="pt-6 border-t border-gray-200 w-full">
                     <h3 class="font-bold text-gray-900 mb-4 text-lg">Descrição</h3>
                     <div class="prose prose-sm max-w-none text-gray-700 leading-relaxed">
@@ -344,9 +347,6 @@
                     </div>
                 </div>
                 @endif
-            </div>
-        </div>
-
         <!-- Related Products -->
         @if($relatedProducts->count() > 0)
         <div class="mt-24 pt-12 border-t border-gray-200">
