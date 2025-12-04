@@ -56,41 +56,57 @@
         }
         
         .products-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 6px;
+            width: 100%;
             margin-bottom: 12px;
+        }
+        
+        .product-row {
+            width: 100%;
+            margin-bottom: 10px;
+            page-break-inside: avoid;
+            overflow: hidden;
         }
         
         .product-card {
             border: 1px solid #d1d5db;
             border-radius: 4px;
-            padding: 5px;
+            padding: 8px;
             background: #ffffff;
-            min-height: 180px;
-            display: flex;
-            flex-direction: column;
+            width: 24%;
+            float: left;
+            margin-right: 1.33%;
+            min-height: 200px;
+            page-break-inside: avoid;
+            box-sizing: border-box;
+        }
+        
+        .product-card:nth-child(4n) {
+            margin-right: 0;
+        }
+        
+        .product-row::after {
+            content: "";
+            display: table;
+            clear: both;
         }
         
         .product-image-container {
             width: 100%;
-            height: 100px;
-            margin-bottom: 4px;
+            height: 120px;
+            margin-bottom: 6px;
             overflow: hidden;
             border-radius: 3px;
             background: #f3f4f6;
-            flex-shrink: 0;
             text-align: center;
-            line-height: 100px;
+            line-height: 120px;
         }
         
         .product-image {
-            max-width: 100%;
-            max-height: 100px;
+            max-width: 95%;
+            max-height: 120px;
             width: auto;
             height: auto;
             vertical-align: middle;
-            display: inline-block;
         }
         
         .no-image {
@@ -248,8 +264,10 @@
             </div>
             
             <div class="products-grid">
-                @foreach($category->products as $product)
-                    <div class="product-card">
+                @foreach($category->products->chunk(4) as $productRow)
+                    <div class="product-row">
+                        @foreach($productRow as $product)
+                            <div class="product-card">
                         <!-- Imagem -->
                         <div class="product-image-container">
                             @if($product->images->count() > 0)
@@ -261,7 +279,7 @@
                                     <img src="{{ $fullPath }}" 
                                          alt="{{ $product->name }}" 
                                          class="product-image"
-                                         style="max-width: 100%; max-height: 100px; width: auto; height: auto; display: inline-block; vertical-align: middle;">
+                                         style="max-width: 95%; max-height: 120px; width: auto; height: auto; display: inline-block; vertical-align: middle;">
                                 @else
                                     <div class="no-image">Sem imagem</div>
                                 @endif
@@ -297,6 +315,8 @@
                         <div class="product-price">
                             {{ $product->getPriceDisplay() }}
                         </div>
+                            </div>
+                        @endforeach
                     </div>
                 @endforeach
             </div>
