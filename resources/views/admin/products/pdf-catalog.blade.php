@@ -70,17 +70,17 @@
         .product-card {
             border: 1px solid #d1d5db;
             border-radius: 4px;
-            padding: 6px;
+            padding: 10px;
             background: #ffffff;
-            width: 23%;
+            width: 32%;
             float: left;
-            margin-right: 2.66%;
-            min-height: 200px;
+            margin-right: 2%;
+            min-height: 220px;
             page-break-inside: avoid;
             box-sizing: border-box;
         }
         
-        .product-card:nth-child(4n) {
+        .product-card:nth-child(3n) {
             margin-right: 0;
         }
         
@@ -96,18 +96,18 @@
         
         .product-image-container {
             width: 100%;
-            height: 120px;
-            margin-bottom: 6px;
+            height: 140px;
+            margin-bottom: 8px;
             overflow: hidden;
             border-radius: 3px;
             background: #f3f4f6;
             text-align: center;
-            line-height: 120px;
+            line-height: 140px;
         }
         
         .product-image {
             max-width: 95%;
-            max-height: 120px;
+            max-height: 140px;
             width: auto;
             height: auto;
             vertical-align: middle;
@@ -268,7 +268,7 @@
             </div>
             
             <div class="products-grid">
-                @foreach($category->products->chunk(4) as $productRow)
+                @foreach($category->products->chunk(3) as $productRow)
                     <div class="product-row">
                         @foreach($productRow as $product)
                             <div class="product-card">
@@ -283,7 +283,7 @@
                                     <img src="{{ $fullPath }}" 
                                          alt="{{ $product->name }}" 
                                          class="product-image"
-                                         style="max-width: 95%; max-height: 120px; width: auto; height: auto; display: inline-block; vertical-align: middle;">
+                                         style="max-width: 95%; max-height: 140px; width: auto; height: auto; display: inline-block; vertical-align: middle;">
                                 @else
                                     <div class="no-image">Sem imagem</div>
                                 @endif
