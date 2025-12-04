@@ -124,15 +124,6 @@
                         <span class="text-3xl font-bold text-blue-600">Sob Consulta</span>
                     @endif
                 </div>
-
-                <!-- Descrição -->
-                <div class="prose prose-lg max-w-none">
-                    <h3 class="text-xl font-bold text-gray-900 mb-3">Descrição</h3>
-                    <div class="text-gray-600 leading-relaxed">
-                        {!! nl2br(e($product->description)) !!}
-                    </div>
-                </div>
-
                 @if($product->materials->count() > 0)
                 <div>
                     <h3 class="font-bold text-gray-900 mb-2">Materiais:</h3>
@@ -340,6 +331,16 @@
                             </details>
                         </div>
                         @endif
+                    </div>
+                </div>
+                @endif
+
+                <!-- Descrição do Produto -->
+                @if($product->description)
+                <div class="pt-6 border-t border-gray-200 w-full">
+                    <h3 class="font-bold text-gray-900 mb-4 text-lg">Descrição</h3>
+                    <div class="prose prose-sm max-w-none text-gray-700 leading-relaxed">
+                        {!! nl2br(e($product->description)) !!}
                     </div>
                 </div>
                 @endif
