@@ -353,15 +353,6 @@
                             {{ $product->getPriceDisplay() }}
                         </div>
                         
-                        <!-- Descrição -->
-                        @if($product->description)
-                        <div class="product-description">
-                            <div class="product-description-title">Descrição</div>
-                            <div class="product-description-text">{{ $product->description }}</div>
-                        </div>
-                        @endif
-                            </div>
-                        @endforeach
                     </div>
                 @endforeach
             </div>
