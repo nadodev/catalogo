@@ -235,7 +235,13 @@ class ProductController extends Controller
             'materials.*' => ['nullable', 'exists:materials,id'],
             'images' => ['nullable', 'array'],
             'images.*' => ['image', 'max:5120'],
-            // Variantes removidas - não serão processadas no update para evitar exclusões acidentais
+            'variants' => ['nullable', 'array'],
+            'variants.*.color_id' => ['nullable', 'exists:colors,id'],
+            'variants.*.size_id' => ['nullable', 'exists:sizes,id'],
+            'variants.*.price' => ['nullable', 'numeric', 'min:0'],
+            'variants.*.stock' => ['nullable', 'integer', 'min:0'],
+            'variants.*.sku' => ['nullable', 'string', 'max:255'],
+            'variants.*.image' => ['nullable', 'image', 'max:5120'],
             'quantity_prices' => ['nullable', 'array'],
             'quantity_prices.*.min_quantity' => ['nullable', 'integer', 'min:1'],
             'quantity_prices.*.max_quantity' => ['nullable', 'integer', 'min:1'],
@@ -274,8 +280,67 @@ class ProductController extends Controller
             }
         }
 
-        // Variantes do produto - REMOVIDO para evitar exclusões acidentais
-        // As variantes existentes serão mantidas e não serão alteradas durante a edição
+        // Atualizar variantes existentes e criar novas
+        if ($request->has('variants')) {
+            foreach ($request->variants as $variantId => $variantData) {
+                // Se começar com "new_", é uma nova variante
+                if (str_starts_with($variantId, 'new_')) {
+                    if (!empty($variantData['color_id']) || !empty($variantData['size_id'])) {
+                        $variantAttributes = [
+                            'product_id' => $product->id,
+                            'color_id' => $variantData['color_id'] ?? null,
+                            'size_id' => $variantData['size_id'] ?? null,
+                            'price' => $variantData['price'] ?? null,
+                            'stock' => $variantData['stock'] ?? null,
+                            'sku' => $variantData['sku'] ?? null,
+                            'is_active' => true,
+                        ];
+
+                        // Salvar imagem da variante se fornecida
+                        if (isset($variantData['image']) && $variantData['image']->isValid()) {
+                            $imagePath = $variantData['image']->store('variants', 'public');
+                            $variantAttributes['image_path'] = $imagePath;
+                        }
+
+                        ProductVariant::create($variantAttributes);
+                    }
+                } else {
+                    // Verificar se a variante deve ser excluída
+                    if (isset($variantData['delete']) && $variantData['delete'] == '1') {
+                        $variant = ProductVariant::find($variantId);
+                        if ($variant && $variant->product_id === $product->id) {
+                            // Deletar imagem se existir
+                            if ($variant->image_path) {
+                                Storage::disk('public')->delete($variant->image_path);
+                            }
+                            $variant->delete();
+                        }
+                    } else {
+                        // Atualizar variante existente
+                        $variant = ProductVariant::find($variantId);
+                        if ($variant && $variant->product_id === $product->id) {
+                            $variant->color_id = $variantData['color_id'] ?? null;
+                            $variant->size_id = $variantData['size_id'] ?? null;
+                            $variant->price = $variantData['price'] ?? null;
+                            $variant->stock = $variantData['stock'] ?? null;
+                            $variant->sku = $variantData['sku'] ?? null;
+
+                            // Atualizar imagem se uma nova foi fornecida
+                            if (isset($variantData['image']) && $variantData['image']->isValid()) {
+                                // Deletar imagem antiga se existir
+                                if ($variant->image_path) {
+                                    Storage::disk('public')->delete($variant->image_path);
+                                }
+                                $imagePath = $variantData['image']->store('variants', 'public');
+                                $variant->image_path = $imagePath;
+                            }
+
+                            $variant->save();
+                        }
+                    }
+                }
+            }
+        }
 
         // Atualizar faixas de preço por quantidade
         // IMPORTANTE: Só atualizar faixas se houver faixas VÁLIDAS no request

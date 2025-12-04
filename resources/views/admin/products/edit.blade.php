@@ -207,7 +207,82 @@
             <p class="text-xs text-gray-500 mt-2">Configure preços diferentes baseados na quantidade comprada (ex: 1-9 unidades = R$ 10, 10+ unidades = R$ 8)</p>
         </div>
 
-        {{-- Seção de Variantes REMOVIDA --}}
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Variantes Existentes</label>
+            <div id="variants-container" class="space-y-4">
+                @foreach($product->variants as $index => $variant)
+                <div class="variant-item border border-gray-200 rounded-lg p-4">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-sm font-medium text-gray-700">Variante {{ $index + 1 }}</span>
+                        <label class="flex items-center gap-2 text-sm">
+                            <input type="checkbox" name="variants[{{ $variant->id }}][delete]" value="1" 
+                                   class="w-4 h-4 text-red-600 border-gray-300 rounded focus:ring-red-500">
+                            <span class="text-red-500 hover:text-red-700">Marcar para excluir</span>
+                        </label>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Cor</label>
+                            <select name="variants[{{ $variant->id }}][color_id]" class="variant-color w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                <option value="">Selecione uma cor...</option>
+                                @foreach($colors as $color)
+                                    <option value="{{ $color->id }}" {{ $variant->color_id == $color->id ? 'selected' : '' }}>{{ $color->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Tamanho</label>
+                            <select name="variants[{{ $variant->id }}][size_id]" class="variant-size w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                <option value="">Selecione um tamanho...</option>
+                                @foreach($sizes as $size)
+                                    <option value="{{ $size->id }}" {{ $variant->size_id == $size->id ? 'selected' : '' }}>{{ $size->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Preço (opcional)</label>
+                            <input type="number" name="variants[{{ $variant->id }}][price]" step="0.01" min="0" value="{{ $variant->price }}"
+                                   placeholder="Preço específico desta combinação"
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <p class="text-xs text-gray-500 mt-1">Deixe vazio para usar o preço padrão do produto</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Estoque (opcional)</label>
+                            <input type="number" name="variants[{{ $variant->id }}][stock]" min="0" value="{{ $variant->stock }}"
+                                   placeholder="Estoque"
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                    </div>
+                    <div class="mt-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">SKU (opcional)</label>
+                            <input type="text" name="variants[{{ $variant->id }}][sku]" value="{{ $variant->sku }}"
+                                   placeholder="SKU da variante"
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Imagem da Variante (opcional)</label>
+                            @if($variant->image_path)
+                            <div class="mb-2">
+                                <img src="{{ $variant->image_url }}" alt="Imagem da variante" class="w-20 h-20 object-cover rounded-lg border border-gray-300">
+                                <p class="text-xs text-gray-500 mt-1">Imagem atual</p>
+                            </div>
+                            @endif
+                            <input type="file" name="variants[{{ $variant->id }}][image]" accept="image/*"
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <p class="text-xs text-gray-500 mt-1">Deixe vazio para manter a imagem atual ou selecione uma nova</p>
+                        </div>
+                    </div>
+                </div>
+                @endforeach
+            </div>
+            <button type="button" onclick="addVariant()" class="mt-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 text-sm font-medium">
+                + Adicionar Nova Variante
+            </button>
+            <p class="text-xs text-gray-500 mt-2">
+                <strong>Dica:</strong> Você pode editar as variantes existentes ou adicionar novas. Cada combinação pode ter um preço e imagem diferentes!
+            </p>
+        </div>
 
         @if($product->images->count() > 0)
         <div>
@@ -283,6 +358,68 @@
                 slugInput.value = generateSlug(nameInput.value);
             }
         });
+        
+        let variantIndex = {{ $product->variants->count() }};
+        
+        function addVariant() {
+            const container = document.getElementById('variants-container');
+            const newVariant = document.createElement('div');
+            newVariant.className = 'variant-item border border-gray-200 rounded-lg p-4';
+            newVariant.innerHTML = `
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-sm font-medium text-gray-700">Nova Variante ${variantIndex + 1}</span>
+                    <button type="button" onclick="this.closest('.variant-item').remove()" class="text-red-500 hover:text-red-700 text-sm">
+                        Remover
+                    </button>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Cor</label>
+                        <select name="variants[new_${variantIndex}][color_id]" class="variant-color w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="">Selecione uma cor...</option>
+                            @foreach($colors as $color)
+                                <option value="{{ $color->id }}">{{ $color->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Tamanho</label>
+                        <select name="variants[new_${variantIndex}][size_id]" class="variant-size w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="">Selecione um tamanho...</option>
+                            @foreach($sizes as $size)
+                                <option value="{{ $size->id }}">{{ $size->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Preço (opcional)</label>
+                        <input type="number" name="variants[new_${variantIndex}][price]" step="0.01" min="0" placeholder="Preço específico desta combinação"
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <p class="text-xs text-gray-500 mt-1">Deixe vazio para usar o preço padrão do produto</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Estoque (opcional)</label>
+                        <input type="number" name="variants[new_${variantIndex}][stock]" min="0" placeholder="Estoque"
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+                </div>
+                <div class="mt-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">SKU (opcional)</label>
+                        <input type="text" name="variants[new_${variantIndex}][sku]" placeholder="SKU da variante"
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Imagem da Variante (opcional)</label>
+                        <input type="file" name="variants[new_${variantIndex}][image]" accept="image/*"
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <p class="text-xs text-gray-500 mt-1">Imagem específica desta combinação de cor/tamanho</p>
+                    </div>
+                </div>
+            `;
+            container.appendChild(newVariant);
+            variantIndex++;
+        }
         
         function addQuantityPrice() {
             const container = document.getElementById('quantity-prices-container');
