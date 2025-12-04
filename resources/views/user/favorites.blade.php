@@ -63,7 +63,7 @@
             <div id="favorites-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 @foreach($favorites as $product)
                     <div id="favorite-product-{{ $product->id }}" class="relative">
-                        <x-product-card-modern :product="$product" :showQuantity="false" />
+                        <x-product-card-modern :product="$product" />
                         <button onclick="removeFavoriteFromDashboard({{ $product->id }}, '{{ addslashes($product->name) }}')" 
                                 class="absolute top-2 right-2 p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors shadow-lg z-10"
                                 title="Remover dos favoritos">

@@ -15,7 +15,7 @@
             @if(isset($favorites) && $favorites->count() > 0)
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     @foreach($favorites as $product)
-                        <x-product-card-modern :product="$product" :showQuantity="false" />
+                        <x-product-card-modern :product="$product" />
                     @endforeach
                 </div>
 

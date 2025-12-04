@@ -1,4 +1,4 @@
-@props(['product', 'showQuantity' => true])
+@props(['product'])
 
 <div class="group bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100 transform hover:-translate-y-2">
     <!-- Imagem -->
@@ -79,68 +79,17 @@
             @endif
         </div>
 
-        @if($showQuantity)
-        <!-- Quantidade e Botão -->
-        <div class="space-y-3 pt-4 border-t border-gray-100">
-            <div class="flex items-center gap-2">
-                <label class="text-xs font-semibold text-gray-600">Qtd:</label>
-                <div class="flex items-center border-2 border-gray-200 rounded-xl flex-1 hover:border-blue-400 transition-colors">
-                    <button onclick="updateProductQuantityCard({{ $product->id }}, -1)" 
-                            class="cursor-pointer px-3 py-2 text-gray-600 hover:bg-gray-50 hover:text-blue-600 transition-colors rounded-l-xl" 
-                            id="qty-decrease-card-{{ $product->id }}">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
-                        </svg>
-                    </button>
-                    <input type="number" 
-                           id="qty-input-card-{{ $product->id }}" 
-                           value="1" 
-                           min="1" 
-                           class="w-full text-center border-0 focus:ring-0 text-sm font-bold bg-transparent"
-                           onchange="updateProductQuantityCard({{ $product->id }}, 0, this.value)">
-                    <button onclick="updateProductQuantityCard({{ $product->id }}, 1)" 
-                            class="cursor-pointer px-3 py-2 text-gray-600 hover:bg-gray-50 hover:text-blue-600 transition-colors rounded-r-xl"
-                            id="qty-increase-card-{{ $product->id }}">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                        </svg>
-                    </button>
-                </div>
-            </div>
-            
-            <div class="flex gap-2">
-                <a href="{{ route('products.show', $product->slug) }}" 
-                   class="flex-1 px-4 py-2.5 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-colors text-center text-sm flex items-center justify-center gap-1.5">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                    </svg>
-                    <span>Ver</span>
-                </a>
-                
-                @php
-                    $hasStock = $product->hasStock();
-                @endphp
-                <button onclick="addProductToCartCard({{ $product->id }})" 
-                        @if(!$hasStock) disabled @endif
-                        class="@if($hasStock) cursor-pointer flex-1 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-semibold hover:shadow-lg hover:scale-105 transition-all flex items-center justify-center gap-1.5 @else flex-1 px-4 py-2.5 bg-gray-300 text-gray-500 rounded-xl font-semibold cursor-not-allowed flex items-center justify-center gap-1.5 @endif"
-                        id="add-cart-btn-card-{{ $product->id }}">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
-                    </svg>
-                    <span>@if($hasStock) Adicionar @else Sem Estoque @endif</span>
-                </button>
-            </div>
-        </div>
-        @else
-        <!-- Apenas botão de detalhes -->
+        <!-- Botão Ver Mais -->
         <div class="pt-4 border-t border-gray-100">
             <a href="{{ route('products.show', $product->slug) }}" 
-               class="cursor-pointer block w-full px-4 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-semibold hover:shadow-lg hover:scale-105 transition-all text-center text-sm">
-                Ver Detalhes
+               class="cursor-pointer block w-full px-4 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-semibold hover:shadow-lg hover:scale-105 transition-all text-center text-sm flex items-center justify-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                </svg>
+                <span>Ver Mais</span>
             </a>
         </div>
-        @endif
     </div>
 </div>
 

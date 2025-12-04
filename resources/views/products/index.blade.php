@@ -110,7 +110,7 @@
                 @if($products->count() > 0)
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     @foreach($products as $product)
-                        <x-product-card-modern :product="$product" :showQuantity="true" />
+                        <x-product-card-modern :product="$product" />
                     @endforeach
                 </div>
 
