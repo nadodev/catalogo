@@ -146,16 +146,19 @@
                 </div>
                 @endif
 
-                @if($product->variants->count() > 0)
+                @php
+                    $activeVariants = $product->variants->where('is_active', true);
+                @endphp
+                @if($activeVariants->count() > 0)
                 <div class="pt-6 border-t border-gray-100">
                     <h3 class="font-bold text-gray-900 mb-4">Opções Disponíveis:</h3>
                     <div class="space-y-4">
                         @php
-                            $variantsByColor = $product->variants->groupBy('color_id');
-                            $variantsBySize = $product->variants->groupBy('size_id');
+                            $variantsByColor = $activeVariants->groupBy('color_id');
+                            $variantsBySize = $activeVariants->groupBy('size_id');
                         @endphp
                         
-                        @if($variantsByColor->count() > 1 || ($variantsByColor->first() && $variantsByColor->first()->first()->color))
+                        @if($variantsByColor->count() > 0 && $variantsByColor->first() && $variantsByColor->first()->first() && $variantsByColor->first()->first()->color)
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Cores Disponíveis:</label>
                             <div class="flex flex-wrap gap-2">
@@ -197,7 +200,7 @@
                         </div>
                         @endif
 
-                        @if($variantsBySize->count() > 1 || ($variantsBySize->first() && $variantsBySize->first()->first()->size))
+                        @if($variantsBySize->count() > 0 && $variantsBySize->first() && $variantsBySize->first()->first() && $variantsBySize->first()->first()->size)
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Tamanhos Disponíveis:</label>
                             <div class="flex flex-wrap gap-2">
@@ -236,7 +239,7 @@
                         <div class="mt-4">
                             <label class="block text-sm font-medium text-gray-700 mb-2">Variantes Disponíveis:</label>
                             <div class="space-y-2">
-                                @foreach($product->variants->where('is_active', true) as $variant)
+                                @foreach($activeVariants as $variant)
                                     <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200">
                                         <div class="flex items-center gap-3">
                                             @if($variant->color)

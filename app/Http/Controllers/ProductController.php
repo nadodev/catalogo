@@ -85,7 +85,9 @@ class ProductController extends Controller
     public function show(string $slug): View
     {
         $product = Product::query()
-            ->with(['category', 'images', 'tags', 'materials', 'variants.color', 'variants.size', 'quantityPrices'])
+            ->with(['category', 'images', 'tags', 'materials', 'variants' => function($query) {
+                $query->where('is_active', true)->with(['color', 'size']);
+            }, 'quantityPrices'])
             ->where('slug', $slug)
             ->active()
             ->firstOrFail();
