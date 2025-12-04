@@ -70,17 +70,21 @@
         .product-card {
             border: 1px solid #d1d5db;
             border-radius: 4px;
-            padding: 8px;
+            padding: 6px;
             background: #ffffff;
-            width: 24%;
+            width: 23%;
             float: left;
-            margin-right: 1.33%;
+            margin-right: 2.66%;
             min-height: 200px;
             page-break-inside: avoid;
             box-sizing: border-box;
         }
         
         .product-card:nth-child(4n) {
+            margin-right: 0;
+        }
+        
+        .product-card:last-child {
             margin-right: 0;
         }
         
