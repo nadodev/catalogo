@@ -179,8 +179,9 @@
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Preço (opcional)</label>
-                            <input type="number" name="variants[0][price]" step="0.01" placeholder="Deixe vazio para usar preço padrão"
+                            <input type="number" name="variants[0][price]" step="0.01" min="0" placeholder="Preço específico desta combinação"
                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <p class="text-xs text-gray-500 mt-1">Deixe vazio para usar o preço padrão do produto</p>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Estoque (opcional)</label>
@@ -198,7 +199,10 @@
             <button type="button" onclick="addVariant()" class="mt-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 text-sm font-medium">
                 + Adicionar Variante
             </button>
-            <p class="text-xs text-gray-500 mt-2">Adicione combinações de cores e tamanhos para este produto</p>
+            <p class="text-xs text-gray-500 mt-2">
+                <strong>Dica:</strong> Adicione combinações de cores e tamanhos. Cada combinação pode ter um preço diferente! 
+                Se não definir um preço específico, será usado o preço padrão do produto.
+            </p>
         </div>
 
         <div>

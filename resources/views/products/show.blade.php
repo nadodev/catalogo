@@ -157,20 +157,38 @@
                         
                         @if($variantsByColor->count() > 1 || ($variantsByColor->first() && $variantsByColor->first()->first()->color))
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Cores:</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Cores Disponíveis:</label>
                             <div class="flex flex-wrap gap-2">
                                 @foreach($variantsByColor as $colorId => $variants)
                                     @if($variants->first()->color)
+                                        @php
+                                            $colorVariants = $variants->where('is_active', true);
+                                            $minPrice = $colorVariants->where('price', '>', 0)->min('price');
+                                            $maxPrice = $colorVariants->where('price', '>', 0)->max('price');
+                                            $hasDifferentPrices = $minPrice != $maxPrice;
+                                        @endphp
                                         <div class="relative group">
                                             <button type="button" 
-                                                    class="px-4 py-2 border-2 border-gray-200 rounded-lg hover:border-blue-500 transition-all font-medium text-sm"
+                                                    class="variant-color-btn px-4 py-2 border-2 border-gray-200 rounded-lg hover:border-blue-500 transition-all font-medium text-sm text-left"
+                                                    data-color-id="{{ $colorId }}"
                                                     onclick="selectVariantColor({{ $colorId }})">
-                                                <span class="flex items-center gap-2">
-                                                    @if($variants->first()->color->hex_code)
-                                                        <span class="w-5 h-5 rounded-full border border-gray-300" style="background-color: {{ $variants->first()->color->hex_code }}"></span>
+                                                <div class="flex flex-col gap-1">
+                                                    <span class="flex items-center gap-2">
+                                                        @if($variants->first()->color->hex_code)
+                                                            <span class="w-5 h-5 rounded-full border border-gray-300" style="background-color: {{ $variants->first()->color->hex_code }}"></span>
+                                                        @endif
+                                                        <span>{{ $variants->first()->color->name }}</span>
+                                                    </span>
+                                                    @if($minPrice)
+                                                        <span class="text-xs font-bold text-blue-600">
+                                                            @if($hasDifferentPrices)
+                                                                R$ {{ number_format($minPrice, 2, ',', '.') }} - R$ {{ number_format($maxPrice, 2, ',', '.') }}
+                                                            @else
+                                                                R$ {{ number_format($minPrice, 2, ',', '.') }}
+                                                            @endif
+                                                        </span>
                                                     @endif
-                                                    {{ $variants->first()->color->name }}
-                                                </span>
+                                                </div>
                                             </button>
                                         </div>
                                     @endif
@@ -181,14 +199,32 @@
 
                         @if($variantsBySize->count() > 1 || ($variantsBySize->first() && $variantsBySize->first()->first()->size))
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Tamanhos:</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Tamanhos Disponíveis:</label>
                             <div class="flex flex-wrap gap-2">
                                 @foreach($variantsBySize as $sizeId => $variants)
                                     @if($variants->first()->size)
+                                        @php
+                                            $sizeVariants = $variants->where('is_active', true);
+                                            $minPrice = $sizeVariants->where('price', '>', 0)->min('price');
+                                            $maxPrice = $sizeVariants->where('price', '>', 0)->max('price');
+                                            $hasDifferentPrices = $minPrice != $maxPrice;
+                                        @endphp
                                         <button type="button" 
-                                                class="px-4 py-2 border-2 border-gray-200 rounded-lg hover:border-blue-500 transition-all font-medium text-sm variant-size-btn"
+                                                class="variant-size-btn px-4 py-2 border-2 border-gray-200 rounded-lg hover:border-blue-500 transition-all font-medium text-sm"
+                                                data-size-id="{{ $sizeId }}"
                                                 onclick="selectVariantSize({{ $sizeId }})">
-                                            {{ $variants->first()->size->name }}
+                                            <div class="flex flex-col gap-1">
+                                                <span>{{ $variants->first()->size->name }}</span>
+                                                @if($minPrice)
+                                                    <span class="text-xs font-bold text-blue-600">
+                                                        @if($hasDifferentPrices)
+                                                            R$ {{ number_format($minPrice, 2, ',', '.') }} - R$ {{ number_format($maxPrice, 2, ',', '.') }}
+                                                        @else
+                                                            R$ {{ number_format($minPrice, 2, ',', '.') }}
+                                                        @endif
+                                                    </span>
+                                                @endif
+                                            </div>
                                         </button>
                                     @endif
                                 @endforeach
@@ -364,8 +400,34 @@
             name: '{{ addslashes($product->name) }}',
             slug: '{{ $product->slug }}',
             price: {{ $product->price ?? 0 }},
-            image: @if($product->images->count() > 0) '{{ $product->images->first()->url }}' @else null @endif
+            image: @if($product->images->count() > 0) '{{ $product->images->first()->url }}' @else null @endif,
+            variants: [
+                @foreach($product->variants->where('is_active', true) as $variant)
+                {
+                    id: {{ $variant->id }},
+                    colorId: {{ $variant->color_id ?? 'null' }},
+                    sizeId: {{ $variant->size_id ?? 'null' }},
+                    price: {{ $variant->price ?? 'null' }},
+                    stock: {{ $variant->stock ?? 'null' }},
+                    sku: '{{ $variant->sku ?? '' }}'
+                }@if(!$loop->last),@endif
+                @endforeach
+            ],
+            quantityPrices: [
+                @foreach($product->quantityPrices as $priceTier)
+                {
+                    min_quantity: {{ $priceTier->min_quantity }},
+                    max_quantity: {{ $priceTier->max_quantity ?? 'null' }},
+                    price: {{ $priceTier->price }}
+                }@if(!$loop->last),@endif
+                @endforeach
+            ]
         };
+
+        // Variáveis para rastrear seleção de variantes
+        let selectedColorId = null;
+        let selectedSizeId = null;
+        let selectedVariant = null;
 
         function updateProductQuantity(productId, change, newValue = null) {
             const input = document.getElementById('qty-input-' + productId);
@@ -384,30 +446,111 @@
             updatePriceForQuantity(currentValue);
         }
 
+        function selectVariantColor(colorId) {
+            selectedColorId = colorId;
+            
+            // Remover seleção anterior
+            document.querySelectorAll('.variant-color-btn').forEach(btn => {
+                btn.classList.remove('border-blue-500', 'bg-blue-50');
+                btn.classList.add('border-gray-200');
+            });
+            
+            // Adicionar seleção atual
+            const selectedBtn = document.querySelector(`.variant-color-btn[data-color-id="${colorId}"]`);
+            if (selectedBtn) {
+                selectedBtn.classList.remove('border-gray-200');
+                selectedBtn.classList.add('border-blue-500', 'bg-blue-50');
+            }
+            
+            // Atualizar variante selecionada e preço
+            updateSelectedVariant();
+            updatePriceDisplay();
+        }
+
+        function selectVariantSize(sizeId) {
+            selectedSizeId = sizeId;
+            
+            // Remover seleção anterior
+            document.querySelectorAll('.variant-size-btn').forEach(btn => {
+                btn.classList.remove('border-blue-500', 'bg-blue-50');
+                btn.classList.add('border-gray-200');
+            });
+            
+            // Adicionar seleção atual
+            const selectedBtn = document.querySelector(`.variant-size-btn[data-size-id="${sizeId}"]`);
+            if (selectedBtn) {
+                selectedBtn.classList.remove('border-gray-200');
+                selectedBtn.classList.add('border-blue-500', 'bg-blue-50');
+            }
+            
+            // Atualizar variante selecionada e preço
+            updateSelectedVariant();
+            updatePriceDisplay();
+        }
+
+        function updateSelectedVariant() {
+            const product = window.productData;
+            if (!product || !product.variants) return;
+
+            // Encontrar variante que corresponde à seleção
+            selectedVariant = product.variants.find(v => {
+                const colorMatch = !selectedColorId || v.colorId == selectedColorId;
+                const sizeMatch = !selectedSizeId || v.sizeId == selectedSizeId;
+                return colorMatch && sizeMatch;
+            });
+
+            // Se não encontrou exata, tentar encontrar parcial
+            if (!selectedVariant) {
+                if (selectedColorId && selectedSizeId) {
+                    // Tentar encontrar por cor ou tamanho
+                    selectedVariant = product.variants.find(v => 
+                        v.colorId == selectedColorId || v.sizeId == selectedSizeId
+                    );
+                } else if (selectedColorId) {
+                    selectedVariant = product.variants.find(v => v.colorId == selectedColorId);
+                } else if (selectedSizeId) {
+                    selectedVariant = product.variants.find(v => v.sizeId == selectedSizeId);
+                }
+            }
+        }
+
+        function updatePriceDisplay() {
+            const quantity = parseInt(document.getElementById('qty-input-{{ $product->id }}')?.value) || 1;
+            updatePriceForQuantity(quantity);
+        }
+
         function updatePriceForQuantity(quantity) {
             const product = window.productData;
-            if (!product || !product.quantityPrices || product.quantityPrices.length === 0) {
-                return;
+            if (!product) return;
+
+            // Determinar preço base
+            let basePrice = product.price || 0;
+            
+            // Se há variante selecionada com preço específico, usar esse preço
+            if (selectedVariant && selectedVariant.price !== null) {
+                basePrice = selectedVariant.price;
             }
 
-            // Encontrar a faixa de preço correspondente
-            let selectedPrice = null;
+            // Verificar se há faixas de preço por quantidade
+            let selectedPrice = basePrice;
             let selectedTier = null;
 
-            for (let tier of product.quantityPrices) {
-                if (quantity >= tier.min_quantity) {
-                    if (tier.max_quantity === null || quantity <= tier.max_quantity) {
-                        if (!selectedTier || tier.min_quantity > selectedTier.min_quantity) {
-                            selectedTier = tier;
-                            selectedPrice = tier.price;
+            if (product.quantityPrices && product.quantityPrices.length > 0) {
+                for (let tier of product.quantityPrices) {
+                    if (quantity >= tier.min_quantity) {
+                        if (tier.max_quantity === null || quantity <= tier.max_quantity) {
+                            if (!selectedTier || tier.min_quantity > selectedTier.min_quantity) {
+                                selectedTier = tier;
+                                selectedPrice = tier.price;
+                            }
                         }
                     }
                 }
             }
 
-            // Se não encontrou faixa específica, usar preço padrão
-            if (selectedPrice === null) {
-                selectedPrice = product.price || 0;
+            // Se não encontrou faixa específica, usar preço base
+            if (selectedPrice === null || selectedPrice === 0) {
+                selectedPrice = basePrice;
             }
 
             // Atualizar exibição do preço
@@ -415,6 +558,11 @@
             if (priceDisplay && selectedPrice > 0) {
                 const totalPrice = selectedPrice * quantity;
                 const pricePerUnit = selectedPrice;
+                
+                let variantInfo = '';
+                if (selectedVariant && selectedVariant.price !== null && selectedVariant.price !== product.price) {
+                    variantInfo = '<div class="text-xs text-blue-600 mt-1">Preço específico desta variante</div>';
+                }
                 
                 priceDisplay.innerHTML = `
                     <div>
@@ -426,6 +574,11 @@
                     <div class="text-sm text-gray-500 mt-1" id="price-per-unit">
                         R$ ${pricePerUnit.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} por unidade
                     </div>
+                    ${variantInfo}
+                `;
+            } else if (priceDisplay) {
+                priceDisplay.innerHTML = `
+                    <span class="text-3xl font-bold text-blue-600">Sob Consulta</span>
                 `;
             }
         }
@@ -444,34 +597,63 @@
 
             const quantity = parseInt(document.getElementById('qty-input-' + productId).value) || 1;
             
+            // Determinar preço base
+            let basePrice = product.price || 0;
+            
+            // Se há variante selecionada com preço específico, usar esse preço
+            if (selectedVariant && selectedVariant.price !== null) {
+                basePrice = selectedVariant.price;
+            }
+            
             // Calcular preço baseado na quantidade
-            let priceToUse = product.price || 0;
+            let priceToUse = basePrice;
             if (product.quantityPrices && product.quantityPrices.length > 0) {
-                priceToUse = calculatePriceForQuantity(quantity, product.price, product.quantityPrices);
+                let selectedTier = null;
+                for (let tier of product.quantityPrices) {
+                    if (quantity >= tier.min_quantity) {
+                        if (tier.max_quantity === null || quantity <= tier.max_quantity) {
+                            if (!selectedTier || tier.min_quantity > selectedTier.min_quantity) {
+                                selectedTier = tier;
+                                priceToUse = tier.price;
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // Adicionar informações da variante ao nome do produto se selecionada
+            let productName = product.name;
+            if (selectedVariant) {
+                const variantParts = [];
+                if (selectedVariant.colorId) {
+                    const colorBtn = document.querySelector(`.variant-color-btn[data-color-id="${selectedVariant.colorId}"]`);
+                    if (colorBtn) {
+                        const colorName = colorBtn.textContent.trim().split('\n')[0];
+                        variantParts.push(colorName);
+                    }
+                }
+                if (selectedVariant.sizeId) {
+                    const sizeBtn = document.querySelector(`.variant-size-btn[data-size-id="${selectedVariant.sizeId}"]`);
+                    if (sizeBtn) {
+                        const sizeName = sizeBtn.textContent.trim().split('\n')[0];
+                        variantParts.push(sizeName);
+                    }
+                }
+                if (variantParts.length > 0) {
+                    productName += ' (' + variantParts.join(' - ') + ')';
+                }
             }
             
             // Adicionar ao carrinho com a quantidade e preço corretos
-            addToCart(
-                product.id,
-                product.name,
-                product.slug,
-                priceToUse,
-                product.image,
-                product.quantityPrices || null
-            );
-            
-            // Se a quantidade for maior que 1, adicionar itens adicionais
-            if (quantity > 1) {
-                for (let i = 1; i < quantity; i++) {
-                    addToCart(
-                        product.id,
-                        product.name,
-                        product.slug,
-                        priceToUse,
-                        product.image,
-                        product.quantityPrices || null
-                    );
-                }
+            for (let i = 0; i < quantity; i++) {
+                addToCart(
+                    product.id,
+                    productName,
+                    product.slug,
+                    priceToUse,
+                    product.image,
+                    product.quantityPrices || null
+                );
             }
         }
 
