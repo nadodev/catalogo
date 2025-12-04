@@ -11,16 +11,16 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Nome *</label>
-                <input type="text" name="name" value="{{ old('name') }}" required
+                <input type="text" name="name" id="product-name" value="{{ old('name') }}" required
                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                 @error('name')<p class="text-red-500 text-sm mt-1">{{ $message }}</p>@enderror
             </div>
 
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Slug</label>
-                <input type="text" name="slug" value="{{ old('slug') }}"
+                <input type="text" name="slug" id="product-slug" value="{{ old('slug') }}"
                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                <p class="text-xs text-gray-500 mt-1">Deixe em branco para gerar automaticamente</p>
+                <p class="text-xs text-gray-500 mt-1">Gerado automaticamente a partir do nome</p>
             </div>
 
             <div>
@@ -213,6 +213,50 @@
     <script>
         let variantIndex = 1;
         let quantityPriceIndex = 1;
+        
+        // Função para gerar slug a partir do texto
+        function generateSlug(text) {
+            return text
+                .toString()
+                .toLowerCase()
+                .trim()
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '') // Remove acentos
+                .replace(/\s+/g, '-') // Substitui espaços por hífens
+                .replace(/[^\w\-]+/g, '') // Remove caracteres especiais
+                .replace(/\-\-+/g, '-') // Remove múltiplos hífens
+                .replace(/^-+/, '') // Remove hífens do início
+                .replace(/-+$/, ''); // Remove hífens do fim
+        }
+        
+        // Gerar slug automaticamente quando o nome for digitado
+        document.addEventListener('DOMContentLoaded', function() {
+            const nameInput = document.getElementById('product-name');
+            const slugInput = document.getElementById('product-slug');
+            let slugManuallyEdited = false;
+            
+            // Verificar se a slug já foi editada manualmente (ao carregar a página)
+            if (slugInput.value && slugInput.value !== generateSlug(nameInput.value)) {
+                slugManuallyEdited = true;
+            }
+            
+            // Gerar slug quando o nome for digitado
+            nameInput.addEventListener('input', function() {
+                if (!slugManuallyEdited) {
+                    slugInput.value = generateSlug(this.value);
+                }
+            });
+            
+            // Marcar que a slug foi editada manualmente se o usuário digitar diretamente
+            slugInput.addEventListener('input', function() {
+                slugManuallyEdited = true;
+            });
+            
+            // Se a slug estiver vazia, gerar automaticamente
+            if (!slugInput.value && nameInput.value) {
+                slugInput.value = generateSlug(nameInput.value);
+            }
+        });
         
         function addQuantityPrice() {
             const container = document.getElementById('quantity-prices-container');
