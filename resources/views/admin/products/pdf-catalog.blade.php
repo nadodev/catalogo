@@ -352,7 +352,8 @@
                         <div class="product-price">
                             {{ $product->getPriceDisplay() }}
                         </div>
-                        
+                            </div>
+                        @endforeach
                     </div>
                 @endforeach
             </div>
