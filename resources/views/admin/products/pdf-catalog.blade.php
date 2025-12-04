@@ -163,6 +163,28 @@
             border-top: 1px solid #e5e7eb;
         }
         
+        .product-description {
+            width: 100%;
+            margin-top: 6px;
+            padding-top: 6px;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        .product-description-title {
+            font-size: 8px;
+            font-weight: bold;
+            color: #1f2937;
+            margin-bottom: 3px;
+            text-transform: uppercase;
+        }
+        
+        .product-description-text {
+            font-size: 7px;
+            color: #4b5563;
+            line-height: 1.3;
+            text-align: justify;
+        }
+        
         .product-badges {
             display: flex;
             gap: 3px;
@@ -330,6 +352,14 @@
                         <div class="product-price">
                             {{ $product->getPriceDisplay() }}
                         </div>
+                        
+                        <!-- Descrição -->
+                        @if($product->description)
+                        <div class="product-description">
+                            <div class="product-description-title">Descrição</div>
+                            <div class="product-description-text">{{ $product->description }}</div>
+                        </div>
+                        @endif
                             </div>
                         @endforeach
                     </div>
