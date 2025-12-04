@@ -73,6 +73,7 @@ class ProductController extends Controller
             'variants.*.price' => ['nullable', 'numeric', 'min:0'],
             'variants.*.stock' => ['nullable', 'integer', 'min:0'],
             'variants.*.sku' => ['nullable', 'string', 'max:255'],
+            'variants.*.image' => ['nullable', 'image', 'max:5120'],
             'quantity_prices' => ['nullable', 'array'],
             'quantity_prices.*.min_quantity' => ['nullable', 'integer', 'min:1'],
             'quantity_prices.*.max_quantity' => ['nullable', 'integer', 'min:1'],
@@ -107,7 +108,7 @@ class ProductController extends Controller
         if ($request->has('variants')) {
             foreach ($request->variants as $variantData) {
                 if (!empty($variantData['color_id']) || !empty($variantData['size_id'])) {
-                    ProductVariant::create([
+                    $variantAttributes = [
                         'product_id' => $product->id,
                         'color_id' => $variantData['color_id'] ?? null,
                         'size_id' => $variantData['size_id'] ?? null,
@@ -115,7 +116,15 @@ class ProductController extends Controller
                         'stock' => $variantData['stock'] ?? null,
                         'sku' => $variantData['sku'] ?? null,
                         'is_active' => true,
-                    ]);
+                    ];
+
+                    // Salvar imagem da variante se fornecida
+                    if (isset($variantData['image']) && $variantData['image']->isValid()) {
+                        $imagePath = $variantData['image']->store('variants', 'public');
+                        $variantAttributes['image_path'] = $imagePath;
+                    }
+
+                    ProductVariant::create($variantAttributes);
                 }
             }
         }

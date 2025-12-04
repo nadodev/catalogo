@@ -415,7 +415,8 @@
                     price: {{ $variant->price ?? 'null' }},
                     stock: {{ $variant->stock ?? 'null' }},
                     hasStock: {{ ($variant->stock === null || $variant->stock > 0) ? 'true' : 'false' }},
-                    sku: '{{ $variant->sku ?? '' }}'
+                    sku: '{{ $variant->sku ?? '' }}',
+                    imageUrl: @if($variant->image_path) '{{ $variant->image_url }}' @else null @endif
                 }@if(!$loop->last),@endif
                 @endforeach
             ],
@@ -472,6 +473,7 @@
             updateSelectedVariant();
             updatePriceDisplay();
             updateAddToCartButton();
+            updateVariantImage();
         }
 
         function selectVariantSize(sizeId) {
@@ -494,6 +496,29 @@
             updateSelectedVariant();
             updatePriceDisplay();
             updateAddToCartButton();
+            updateVariantImage();
+        }
+
+        function updateVariantImage() {
+            const product = window.productData;
+            if (!product || !selectedVariant) return;
+
+            const mainImage = document.getElementById('main-image');
+            if (!mainImage) return;
+
+            // Se a variante tem imagem específica, usar ela
+            if (selectedVariant.imageUrl) {
+                mainImage.src = selectedVariant.imageUrl;
+                // Atualizar também o botão de zoom se existir
+                const zoomBtn = mainImage.nextElementSibling;
+                if (zoomBtn && zoomBtn.onclick) {
+                    zoomBtn.setAttribute('onclick', `openImageModal('${selectedVariant.imageUrl}')`);
+                }
+            } else {
+                // Se não tem imagem específica, voltar para a primeira imagem do produto
+                const defaultImage = product.image || '{{ asset("images/product-placeholder.svg") }}';
+                mainImage.src = defaultImage;
+            }
         }
 
         function updateAddToCartButton() {

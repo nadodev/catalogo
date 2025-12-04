@@ -17,6 +17,7 @@ class ProductVariant extends Model
         'price',
         'stock',
         'sku',
+        'image_path',
         'is_active',
     ];
 
@@ -50,5 +51,23 @@ class ProductVariant extends Model
         }
 
         return $this->product?->getPriceDisplay() ?? 'Sob Consulta';
+    }
+
+    /**
+     * Retorna a URL completa da imagem da variante
+     */
+    public function getImageUrlAttribute(): ?string
+    {
+        if (empty($this->image_path)) {
+            return null;
+        }
+
+        // Se começar com "products/" ou "variants/", retorna do storage
+        if (str_starts_with($this->image_path, 'products/') || str_starts_with($this->image_path, 'variants/')) {
+            return asset('storage/'.$this->image_path);
+        }
+
+        // Caso padrão: retorna do storage
+        return asset('storage/'.$this->image_path);
     }
 }

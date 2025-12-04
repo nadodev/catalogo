@@ -189,10 +189,18 @@
                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                         </div>
                     </div>
-                    <div class="mt-2">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">SKU (opcional)</label>
-                        <input type="text" name="variants[0][sku]" placeholder="SKU da variante"
-                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <div class="mt-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">SKU (opcional)</label>
+                            <input type="text" name="variants[0][sku]" placeholder="SKU da variante"
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Imagem da Variante (opcional)</label>
+                            <input type="file" name="variants[0][image]" accept="image/*"
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <p class="text-xs text-gray-500 mt-1">Imagem específica desta combinação de cor/tamanho</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -335,10 +343,18 @@
                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                     </div>
                 </div>
-                <div class="mt-2">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">SKU (opcional)</label>
-                    <input type="text" name="variants[${variantIndex}][sku]" placeholder="SKU da variante"
-                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                <div class="mt-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">SKU (opcional)</label>
+                        <input type="text" name="variants[${variantIndex}][sku]" placeholder="SKU da variante"
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Imagem da Variante (opcional)</label>
+                        <input type="file" name="variants[${variantIndex}][image]" accept="image/*"
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <p class="text-xs text-gray-500 mt-1">Imagem específica desta combinação de cor/tamanho</p>
+                    </div>
                 </div>
             `;
             container.appendChild(newVariant);
