@@ -343,16 +343,6 @@
                     </div>
                 </div>
                 @endif
-
-                <!-- Descrição do Produto -->
-                @if($product->description)
-                <div class="pt-6 border-t border-gray-200 w-full">
-                    <h3 class="font-bold text-gray-900 mb-4 text-lg">Descrição</h3>
-                    <div class="prose prose-sm max-w-none text-gray-700 leading-relaxed">
-                        {!! nl2br(e($product->description)) !!}
-                    </div>
-                </div>
-                @endif
             </div>
         </div>
 
